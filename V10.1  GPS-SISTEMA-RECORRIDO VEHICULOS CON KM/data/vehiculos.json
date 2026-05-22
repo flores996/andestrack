@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1779154351105,
+    "usuario": "angi",
+    "password": "1234",
+    "gps": "1",
+    "placa": "TBB-097",
+    "tipo": "auto",
+    "estado": "bloqueado",
+    "bloqueo": "bloqueado",
+    "motor": "apagado",
+    "velocidad": 0,
+    "km": 5688.195633333324,
+    "latitud": -1.6665,
+    "longitud": -78.65
+  },
+  {
+    "id": 1779154375272,
+    "usuario": "julio",
+    "password": "1234",
+    "gps": "1",
+    "placa": "TBB-097",
+    "tipo": "camion",
+    "estado": "activo",
+    "bloqueo": "desbloqueado",
+    "motor": "encendido",
+    "velocidad": 104,
+    "km": 1553.5300555555436,
+    "latitud": -1.665,
+    "longitud": -78.6515
+  },
+  {
+    "id": 1779158842590,
+    "usuario": "admin",
+    "password": "1234",
+    "gps": "3",
+    "placa": "wde",
+    "tipo": "bus",
+    "estado": "activo",
+    "bloqueo": "desbloqueado",
+    "motor": "encendido",
+    "velocidad": 115,
+    "km": 874.3263666666688,
+    "latitud": -1.6665,
+    "longitud": -78.65
+  }
+]

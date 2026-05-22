@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "usuario": "pedro",
+    "password": "1234",
+    "gps": "GPS-01"
+  },
+  {
+    "id": 2,
+    "usuario": "luis",
+    "password": "1234",
+    "gps": "GPS-02"
+  }
+]
