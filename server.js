@@ -1221,7 +1221,7 @@ io.on("connection", () => {
 // ===============================
 setInterval(async () => {
   try {
-    await fetch(` http://127.0.0.1:${PORT}/actualizar-gps`, {
+    await fetch(`http://127.0.0.1:${PORT}/actualizar-gps`, {
   method: "PUT",
 });
 
