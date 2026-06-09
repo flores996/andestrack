@@ -1221,8 +1221,8 @@ io.on("connection", () => {
 // ===============================
 setInterval(async () => {
   try {
-    await fetch("http://localhost:3000/actualizar-gps", {
-      method: "PUT",
+await fetch("https://andestrack.onrender.com/actualizar-gps", {
+        method: "PUT",
     });
 
     console.log("GPS actualizado");
