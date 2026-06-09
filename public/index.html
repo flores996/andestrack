@@ -1,0 +1,1915 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AndesTrack</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script src="https://unpkg.com/leaflet.marker.slideto@0.2.0/Leaflet.Marker.SlideTo.js">
+
+</script>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-rotatedmarker/leaflet.rotatedMarker.js"></script>
+
+    <style>
+        html,
+body{
+    margin:0;
+    padding:0;
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+
+    margin:0;
+    padding:0;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #081120,
+            #0f172a,
+            #111827
+        );
+
+    font-family:'Segoe UI', sans-serif;
+}
+
+
+        #map {
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+            filter:
+saturate(1.1)
+contrast(1.02)
+brightness(0.95);
+        }
+
+   .panel-izquierdo{
+
+    position:absolute;
+    top:25px;
+    left:25px;
+
+    width:260px;
+
+    padding:20px;
+
+    border-radius:30px;
+
+    z-index:999;
+
+    background:
+    linear-gradient(
+        145deg,
+        rgba(12,18,30,0.95),
+        rgba(20,28,45,0.88)
+    );
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter:blur(18px);
+
+    box-shadow:
+        0 10px 40px rgba(0,0,0,0.45),
+        0 0 25px rgba(0,255,200,0.08);
+
+    overflow:hidden;
+}
+
+.panel-izquierdo::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:-120px;
+    right:-120px;
+
+    width:240px;
+    height:240px;
+
+    background:
+    radial-gradient(
+        circle,
+        rgba(0,255,200,0.18),
+        transparent 70%
+    );
+
+    z-index:0;
+}
+
+.panel-izquierdo *{
+    position:relative;
+    z-index:1;
+}
+
+.titulo{
+
+    display:inline-block;
+
+    font-size:26px;
+
+    font-weight:900;
+
+    letter-spacing:1px;
+
+    margin-bottom:20px;
+
+    background:
+    linear-gradient(
+        90deg,
+        #ffffff,
+        #7fffd4,
+        #00ffd5
+    );
+
+    background-size:200% auto;
+
+    background-clip:text;
+
+    -webkit-background-clip:text;
+
+    color:transparent;
+
+    -webkit-text-fill-color:transparent;
+
+    animation: glow 5s linear infinite;
+
+    text-shadow:
+        0 0 20px rgba(0,255,200,0.15);
+}
+
+@keyframes glow{
+
+    0%{
+        background-position:0% center;
+    }
+
+    100%{
+        background-position:200% center;
+    }
+}
+
+.gps{
+
+    font-size:18px;
+
+    color:#d1d5db;
+
+    margin-bottom:12px;
+}
+
+.gps span{
+
+    color:#00ffd5;
+
+    font-weight:800;
+}
+
+.subtitulo{
+
+    font-size:18px;
+
+    color:#9ca3af;
+
+    margin-top:15px;
+
+    margin-bottom:5px;
+}
+
+.numero{
+
+    font-size:62px;
+
+    font-weight:900;
+
+    line-height:1;
+
+    color:white;
+
+    margin-bottom:20px;
+
+    text-shadow:
+        0 0 20px rgba(0,255,200,0.12);
+}
+
+.estadisticas{
+
+    display:grid;
+
+    grid-template-columns:1fr;
+
+    gap:12px;
+}
+
+.card{
+
+    padding:10px;
+
+    border-radius:14px;
+
+    background:
+    linear-gradient(
+    145deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.02)
+    );
+
+    border:1px solid rgba(255,255,255,0.05);
+
+    color:white;
+
+    font-weight:700;
+
+    text-align:center;
+
+    backdrop-filter:blur(10px);
+
+    transition:0.3s;
+
+    box-shadow:
+        0 0 20px rgba(0,255,200,0.05);
+}
+
+.card:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:
+        0 10px 25px rgba(0,255,200,0.15);
+}
+
+.card div{
+
+    font-size:22px;
+
+    margin-bottom:5px;
+
+    color:#00ffd5;
+
+    font-weight:900;
+}
+
+      .panel-derecho{
+
+    position:absolute;
+
+    top:20px;
+    right:20px;
+
+    width:420px;
+
+    max-height:92vh;
+
+    overflow-y:auto;
+
+    padding:22px;
+
+    border-radius:30px;
+
+    z-index:999;
+
+    background:rgba(10,15,35,0.78);
+
+    backdrop-filter:blur(20px);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    box-shadow:
+        0 10px 40px rgba(0,0,0,0.45),
+        0 0 25px rgba(0,255,200,0.08);
+
+    color:white;
+}
+
+.panel-derecho h2{
+
+    font-size:48px;
+
+    font-weight:900;
+
+    margin-bottom:20px;
+
+    background:
+    linear-gradient(
+        90deg,
+        #ffffff,
+        #7fffd4,
+        #00ffd5
+    );
+
+    -webkit-background-clip:text;
+
+    -webkit-text-fill-color:transparent;
+}
+
+#buscador{
+
+    width:100%;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:rgba(255,255,255,0.08);
+
+    color:white;
+
+    font-size:12px;
+
+    margin-bottom:20px;
+
+    outline:none;
+
+    backdrop-filter:blur(10px);
+}
+
+#buscador::placeholder{
+
+    color:#cbd5e1;
+}
+        .vehiculo-item{
+
+    background:
+linear-gradient(
+    145deg,
+    rgba(25,35,60,0.9),
+    rgba(15,20,40,0.88)
+);
+
+    padding:15px;
+
+    border-radius:15px;
+
+    margin-bottom:18px;
+
+    border:1px solid rgba(255,255,255,0.06);
+
+    backdrop-filter:blur(10px);
+
+    transition:0.3s;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.25);
+}
+
+.vehiculo-item:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:
+        0 10px 25px rgba(0,255,200,0.15);
+}
+
+.estado-activo{
+    border-left:5px solid #00ff88;
+}
+
+.estado-detenido{
+
+    border-left:5px solid #facc15;
+
+    animation:parpadeoDetenido 1s infinite;
+
+    box-shadow:
+        0 0 18px rgba(250,204,21,0.35);
+
+}
+
+.estado-apagado{
+    border-left:5px solid red;
+}
+
+.controles-motor{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin-top:10px;
+}
+
+.controles-motor button{
+    width:100%;
+    min-width:0;
+    text-align:center;
+}
+.btn-on{
+background:#27ae60 !important;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:5px 10px;
+    font-weight:bold;
+}
+
+.btn-off{
+background:#e74c3c !important;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:5px 10px;
+    font-weight:bold;
+}
+
+.btn-bloq{
+background:#f39c12 !important;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:5px 10px;
+    font-weight:bold;
+}
+
+.btn-free{
+background:#3498db !important;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:5px 10px;
+    font-weight:bold;
+}
+.estado-bloqueado{
+    border-left:5px solid red;
+}  
+.btn-on:disabled{
+    background:#8b6f47;
+    color:white;
+    cursor:not-allowed;
+    border:none;
+}
+button{
+
+    border:none;
+
+    border-radius:12px;
+
+    padding:8px 14px;
+
+    font-size:12px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:0.25s;
+
+    color:white;
+    background:rgba(255,255,255,0.08);
+
+    backdrop-filter:blur(10px);
+
+    box-shadow:
+        0 4px 15px rgba(0,0,0,0.2);
+}
+
+button:hover{
+
+    transform:translateY(-2px);
+
+    opacity:0.92;
+}
+@keyframes flotar{
+
+    0%{
+        transform:translateY(0px);
+    }
+
+    50%{
+        transform:translateY(-4px);
+    }
+
+    100%{
+        transform:translateY(0px);
+    }
+}
+@keyframes parpadeoDetenido{
+
+    0%{
+
+        box-shadow:
+        0 0 10px rgba(250,204,21,0.20);
+
+    }
+
+    50%{
+
+        box-shadow:
+        0 0 28px rgba(250,204,21,0.70);
+
+    }
+
+    100%{
+
+        box-shadow:
+        0 0 10px rgba(250,204,21,0.20);
+
+    }
+
+}
+.perfil-box{
+    position:absolute;
+    top:20px;
+    right:20px;
+    z-index:9999;
+}
+.perfil-btn{
+
+    background:
+    linear-gradient(
+        135deg,
+        #1d4ed8,
+        #2563eb,
+        #0ea5e9
+    );
+
+    color:white;
+
+    border:none;
+
+    padding:12px 18px;
+
+    border-radius:14px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+    transition:0.3s;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,0.3);
+}
+.perfil-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 12px 25px rgba(0,150,255,0.35);
+}
+.menu-perfil{
+    display:none;
+    flex-direction:column;
+    background:#13274f;
+    margin-top:10px;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.menu-perfil button{
+    background:none;
+    border:none;
+    color:white;
+    padding:12px;
+    cursor:pointer;
+    text-align:left;
+    transition:0.25s;
+}
+
+.menu-perfil button:hover{
+
+    background:
+    rgba(255,255,255,0.08);
+
+    backdrop-filter:blur(10px);
+
+    transform:translateX(3px);
+}
+
+
+
+@media (max-width: 768px){
+
+    body{
+        overflow:hidden;
+    }
+
+    #map{
+        width:100vw;
+        height:100vh;
+    }
+
+    .panel-izquierdo{
+        position:absolute;
+        top:75px;
+        left:8px;
+        width:220px;
+        transform:scale(0.55);
+        transform-origin:top left;
+        z-index:999;
+    }
+
+    .panel-derecho{
+        position:absolute;
+        left:170px;
+        right:auto;
+        bottom:18px;
+        top:auto;
+        width:420px;
+        max-height:360px;
+        overflow-y:auto;
+        transform:scale(0.52);
+        transform-origin:bottom left;
+        z-index:999;
+    }
+
+    .panel-derecho h2{
+        font-size:34px;
+        margin-bottom:10px;
+    }
+
+    .vehiculo-item{
+        margin-bottom:12px;
+    }
+
+    .perfil-box{
+        top:95px;
+        right:8px;
+        transform:scale(0.65);
+        transform-origin:top right;
+        z-index:9999;
+    }
+
+    .leaflet-popup{
+        display:block !important;
+    }
+}
+
+@media (max-width: 768px) and (orientation: landscape){
+
+    .panel-izquierdo{
+        top:65px;
+        left:8px;
+        width:260px;
+        transform:scale(0.50);
+    }
+
+    .panel-derecho{
+        top:65px;
+        right:8px;
+        left:auto;
+        bottom:auto;
+        width:420px;
+        max-height:82vh;
+        transform:scale(0.50);
+        transform-origin:top right;
+    }
+}
+.alerta-velocidad{
+    position:fixed;
+    top:78px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#ff2d55;
+    color:white;
+    padding:4px 10px;
+    border-radius:8px;
+    font-size:9px;
+    font-weight:700;
+    z-index:99999;
+    box-shadow:0 0 10px rgba(255,0,0,0.35);
+    white-space:nowrap;
+}
+
+@media (max-width:768px){
+    .alerta-velocidad{
+        top:70px;
+        left:58%;
+        padding:6px 12px;
+        border-radius:9px;
+        font-size:10px;
+        font-weight:800;
+        max-width:260px;
+        white-space:nowrap;
+    }
+}
+    </style>
+</head>
+
+<body>
+<div class="perfil-box">
+  <button class="perfil-btn" onclick="toggleMenu()">
+    👤 <span id="nombreUsuario">Usuario</span> ▼
+  </button>
+
+  <div class="menu-perfil" id="menuPerfil">
+    <button onclick="abrirPerfil()">
+      Mi perfil
+    </button>
+<script>
+const adminActual =
+localStorage.getItem("usuario");
+
+if(adminActual !== "true"){
+
+document.write(`
+
+`);
+
+}
+</script>
+
+    <button onclick="cerrarSesion()">
+      Cerrar sesión
+    </button>
+  </div>
+</div>
+    <div id="map"></div>
+
+    <div class="panel-izquierdo">
+
+    <div class="titulo">
+        AndesTrack
+    </div>
+
+    <div class="gps">
+        GPS Asignado:
+        <span id="gpsAsignado"></span>
+    </div>
+
+    <div class="subtitulo">
+        Vehículos activos
+    </div>
+
+    <div class="numero" id="totalVehiculos">
+        0
+    </div>
+
+    <div class="estadisticas">
+
+        <div class="card">
+            <div id="activos">0</div>
+            Activos
+        </div>
+
+        <div class="card">
+            <div id="detenidos">0</div>
+            Detenidos
+        </div>
+
+        <div class="card">
+            <div id="apagados">0</div>
+            Apagados
+        </div>
+
+    </div>
+
+</div>
+
+    <div class="panel-derecho">
+
+        <h2>Vehículos</h2>
+
+        <input
+            type="text"
+            id="buscador"
+            placeholder="Buscar vehículo..."
+        >
+
+        <div id="listaVehiculos"></div>
+
+    </div>
+
+    <script>
+
+const socket = io();
+
+function fechaLimpia(fecha){
+    if(!fecha) return "-";
+    return String(fecha).split("T")[0];
+}
+
+const usuario = localStorage.getItem("usuario") || "true";
+
+document.getElementById("nombreUsuario").innerText = usuario;
+
+const gps = localStorage.getItem("gps");
+
+document.getElementById("gpsAsignado").innerText = gps;
+
+const mapa = L.map('map').setView([-1.8312, -78.1834], 7);
+
+L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+        attribution: '&copy; CARTO & OpenStreetMap'
+    }
+).addTo(mapa);
+
+const vehiculos = {};
+let geocercasMapa = {};
+
+const usuarioLogueado = localStorage.getItem("usuario");
+
+const listaVehiculos = document.getElementById("listaVehiculos");
+
+const activosEl = document.getElementById("activos");
+const detenidosEl = document.getElementById("detenidos");
+const apagadosEl = document.getElementById("apagados");
+const totalEl = document.getElementById("totalVehiculos");
+
+async function cargarVehiculosIniciales(){
+
+    try{
+
+        const gpsUsuario = localStorage.getItem("gps");
+        const admin = localStorage.getItem("admin");
+
+        let url = "/vehiculos/gps/" + gpsUsuario;
+
+        if(admin === "true" || admin === "1"){
+            url = "/vehiculos";
+        }
+
+        const respuesta = await fetch(url);
+        const lista = await respuesta.json();
+
+        console.log(lista);
+
+        lista.forEach(data => {
+            procesarVehiculo(data);
+        });
+
+    }catch(error){
+        console.log(error);
+    }
+
+}
+
+function actualizarContadores() {
+
+    let activos = 0;
+    let detenidos = 0;
+    let apagados = 0;
+
+    Object.values(vehiculos).forEach(v => {
+
+        if (v.estado === "activo") {
+            activos++;
+        }
+        else if (
+            v.estado === "detenido"
+            ||
+            Number(v.velocidad) <= 5
+        ) {
+            detenidos++;
+        }
+        else {
+            apagados++;
+        }
+
+    });
+
+    activosEl.innerText = activos;
+    detenidosEl.innerText = detenidos;
+    apagadosEl.innerText = apagados;
+
+    totalEl.innerText = activos + detenidos + apagados;
+}
+
+function procesarVehiculo(data){
+
+    const admin = localStorage.getItem("admin");
+    const esAdmin = admin === "true" || admin === "1";
+
+    if(!esAdmin){
+
+        const gpsUsuario = localStorage.getItem("gps");
+
+        if(data.gps != gpsUsuario){
+            return;
+        }
+    }
+
+    console.log("RECIBIDO:", data);
+
+    const id = data.usuario;
+
+    if (!vehiculos[id]) {
+
+        const iconos = {
+
+            auto: L.icon({
+                iconUrl:'https://cdn-icons-png.flaticon.com/512/744/744465.png',
+                iconSize: [42,42],
+                iconAnchor: [21,42],
+                popupAnchor: [0,-40]
+            }),
+
+            bus: L.icon({
+                iconUrl:'https://cdn-icons-png.flaticon.com/512/3448/3448339.png',
+                iconSize: [48,48],
+                iconAnchor: [24,48],
+                popupAnchor: [0,-40]
+            }),
+
+            moto: L.icon({
+                iconUrl:'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+                iconSize: [38,38],
+                iconAnchor: [19,38],
+                popupAnchor: [0,-35]
+            }),
+
+            camion: L.icon({
+                iconUrl:'https://cdn-icons-png.flaticon.com/512/819/819489.png',
+                iconSize: [50,50],
+                iconAnchor: [25,50],
+                popupAnchor: [0,-45]
+            })
+
+        };
+
+        const marker = L.marker(
+            [
+                Number(data.latitud),
+                Number(data.longitud)
+            ],
+            {
+                icon: iconos[data.tipo] || iconos.auto,
+                rotationAngle: 0
+            }
+        ).addTo(mapa);
+
+        marker.bindPopup(`
+
+    <div style="width:220px">
+
+        <h3 style="
+            margin-bottom:10px;
+            color:#00bfff;
+        ">
+            ${id}
+        </h3>
+
+        <p>
+            <b>Placa:</b>
+            ${data.placa}
+        </p>
+
+        <p>
+            <b>Tipo:</b>
+            ${data.tipo}
+        </p>
+
+        <p>
+            <b>Velocidad:</b>
+            ${data.velocidad} km/h
+        </p>
+
+        <p>
+            <b>Estado:</b>
+            ${data.estado}
+        </p>
+
+        <p>
+            <b>Kilómetros:</b>
+            ${data.km}
+        </p>
+
+        <p>
+            <b>GPS:</b>
+            ${data.gps}
+        </p>
+
+    </div>
+
+`);
+
+        vehiculos[id] = {
+            marker,
+            estado: data.estado,
+            velocidad: data.velocidad,
+            motor: data.motor,
+            latitud: Number(data.latitud),
+            longitud: Number(data.longitud)
+        };
+
+        let estadoVisualInicial = data.estado;
+
+        if(Number(data.velocidad) <= 5 && data.motor === "encendido"){
+            estadoVisualInicial = "detenido";
+        }
+
+        const item = document.createElement("div");
+
+        item.className = "vehiculo-item estado-" + estadoVisualInicial;
+        item.id = "item-" + id;
+
+        item.innerHTML = `
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:8px;
+">
+
+<h3 id="nombre-${id}">
+${
+localStorage.getItem(
+    "vehiculo-" + id
+) || id
+}
+</h3>
+
+${id === "true" ? "" : `
+
+<button
+onclick="editarVehiculo('${id}')"
+style="
+padding:5px 10px;
+font-size:11px;
+background:#2563eb;
+border:none;
+border-radius:8px;
+color:white;
+cursor:pointer;
+">
+✏️
+</button>
+
+`}
+
+</div>
+    <p>
+        Velocidad:
+        <span id="vel-${id}">
+        ${data.velocidad}
+        </span>
+        km/h
+    </p>
+
+    <p>
+        Estado:
+        <span id="estado-${id}">
+        ${data.estado}
+        </span>
+    </p>
+    <p style="font-size:11px;color:#cbd5e1;">
+    📅 Creado: ${fechaLimpia(data.fecha_creacion)}
+</p>
+
+<p style="font-size:11px;color:#fbbf24;">
+    ⏳ Vence: ${fechaLimpia(data.fecha_vencimiento)}
+</p>
+
+    <div class="controles-motor">
+
+<button
+onclick="encenderMotor('${id}')"
+class="btn-on"
+${data.estado === 'bloqueado' ? 'disabled' : ''}
+style="${data.estado === 'bloqueado'
+? 'background:#8b6f47; cursor:not-allowed; opacity:0.7;'
+: 'background:#27ae60;'}"
+> 
+ON
+</button>
+
+<button
+onclick="apagarMotor('${id}')"
+class="btn-off">
+🔴 OFF
+</button>
+
+<button
+onclick="bloquearVehiculo('${id}')"
+class="btn-lock">
+🔒 Bloq
+</button>
+
+<button
+onclick="desbloquearVehiculo('${id}')"
+class="btn-unlock">
+🔓 Free
+</button>
+
+<button
+onclick="verGPSVehiculo('${id}')"
+class="btn-gps">
+📍 GPS
+</button>
+<button
+onclick="crearGeocerca('${id}', ${Number(data.latitud)}, ${Number(data.longitud)})"
+class="btn-gps">
+⭕ Geocerca
+</button>
+<button
+onclick="toggleHistorial('${id}'); verHistorial('${id}')"
+class="btn-gps">
+📋 Historial
+</button>
+<button
+onclick="generarPdfHistorial('${id}')"
+class="btn-gps">
+📄 PDF
+</button>
+</div>
+
+<div
+id="panel-historial-${id}"
+style="
+display:none;
+margin-top:10px;
+">
+
+<input
+type="datetime-local"
+id="desde-${id}"
+style="
+width:100%;
+margin-top:5px;
+padding:5px;
+border-radius:8px;
+border:none;
+">
+
+<input
+type="datetime-local"
+id="hasta-${id}"
+style="
+width:100%;
+margin-top:5px;
+padding:5px;
+border-radius:8px;
+border:none;
+">
+
+<button
+onclick="consultarRecorrido('${id}')"
+style="
+margin-top:8px;
+width:100%;
+background:linear-gradient(
+135deg,
+#00b894,
+#00cec9
+);
+color:white;
+border:none;
+padding:10px;
+border-radius:10px;
+font-weight:bold;
+">
+CONSULTAR RECORRIDO
+</button>
+
+<div
+id="recorrido-${id}"
+style="
+margin-top:8px;
+color:white;
+font-weight:bold;
+">
+🚗 Recorrió: 0 km
+</div>
+
+<div
+id="historial-${id}"
+style="
+margin-top:10px;
+">
+</div>
+
+</div>
+`;
+        listaVehiculos.appendChild(item);
+
+        cargarGeocercas(id);
+
+    } else {
+
+        const markerActual = vehiculos[id].marker;
+
+        const latAnterior = markerActual.getLatLng().lat;
+        const lngAnterior = markerActual.getLatLng().lng;
+
+        const angulo = Math.atan2(
+            Number(data.longitud) - lngAnterior,
+            Number(data.latitud) - latAnterior
+        ) * 180 / Math.PI;
+
+markerActual.setRotationAngle(0);
+        if(typeof markerActual.slideTo === "function"){
+            markerActual.slideTo(
+                [Number(data.latitud), Number(data.longitud)],
+                {
+                    duration: 7000
+                }
+            );
+        }else{
+            markerActual.setLatLng([
+                Number(data.latitud),
+                Number(data.longitud)
+            ]);
+        }
+
+        document.getElementById("vel-" + id).innerText = data.velocidad;
+        document.getElementById("estado-" + id).innerText = data.estado;
+
+        vehiculos[id].estado = data.estado;
+        vehiculos[id].velocidad = data.velocidad;
+        vehiculos[id].motor = data.motor;
+        vehiculos[id].latitud = Number(data.latitud);
+        vehiculos[id].longitud = Number(data.longitud);
+
+        let estadoVisual = data.estado;
+
+        if(Number(data.velocidad) <= 5 && data.motor === "encendido"){
+            estadoVisual = "detenido";
+        }
+
+        document.getElementById("item-" + id).className =
+            "vehiculo-item estado-" + estadoVisual;
+    }
+
+    actualizarContadores();
+
+if (Number(data.velocidad) > 100) {
+
+    const alerta = document.createElement("div");
+
+    alerta.className = "alerta-velocidad";
+
+    alerta.innerHTML = `
+        ⚠️ Exceso de velocidad de ${id}: ${data.velocidad} km/h
+    `;
+
+    document.body.appendChild(alerta);
+
+    setTimeout(() => {
+        alerta.remove();
+    }, 3000);
+}
+}
+
+const buscador = document.getElementById("buscador");
+
+buscador.addEventListener("input", function () {
+
+    const texto = this.value.toLowerCase();
+
+    const items = document.querySelectorAll(".vehiculo-item");
+
+    items.forEach(item => {
+
+        if (
+            item.innerText.toLowerCase()
+            .includes(texto)
+        ) {
+            item.style.display = "block";
+        }
+        else {
+            item.style.display = "none";
+        }
+
+    });
+
+});
+
+async function apagarMotor(usuario){
+
+    const respuesta = await fetch(
+        "/vehiculos/" + usuario + "/motor",
+        {
+            method:"PUT",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                motor:"apagado"
+            })
+        }
+    );
+
+    const data = await respuesta.json();
+    console.log("RESPUESTA OFF:", data);
+
+    if(data.ok){
+        mostrarAlerta("Motor apagado de " + usuario);
+    }else{
+        mostrarAlerta("Error apagando motor");
+    }
+}
+
+async function encenderMotor(usuario){
+
+    if(vehiculos[usuario] && vehiculos[usuario].estado === "bloqueado"){
+
+        mostrarAlerta(
+            "⚠️ Vehículo bloqueado. Primero desbloquee el auto."
+        );
+
+        return;
+    }
+
+    const respuesta = await fetch(
+        "/vehiculos/" + usuario + "/motor",
+        {
+            method:"PUT",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                motor:"encendido"
+            })
+        }
+    );
+
+    const data = await respuesta.json();
+    console.log("RESPUESTA ON:", data);
+
+    if(data.ok){
+        mostrarAlerta("Motor encendido de " + usuario);
+    }else{
+        mostrarAlerta("Error encendiendo motor");
+    }
+}
+
+async function bloquearVehiculo(usuario){
+
+    const respuesta = await fetch(
+        "/vehiculos/" + usuario + "/bloqueo",
+        {
+            method:"PUT",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                bloqueo:"bloqueado"
+            })
+        }
+    );
+
+    const data = await respuesta.json();
+    console.log("RESPUESTA BLOQUEO:", data);
+
+    if(data.ok){
+        mostrarAlerta("⚠️ Vehículo bloqueado");
+    }else{
+        mostrarAlerta("Error bloqueando vehículo");
+    }
+}
+
+async function desbloquearVehiculo(usuario){
+
+    const respuesta = await fetch(
+        "/vehiculos/" + usuario + "/bloqueo",
+        {
+            method:"PUT",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                bloqueo:"desbloqueado"
+            })
+        }
+    );
+
+    const data = await respuesta.json();
+    console.log("RESPUESTA DESBLOQUEO:", data);
+
+    if(data.ok){
+        mostrarAlerta("Vehículo desbloqueado");
+    }else{
+        mostrarAlerta("Error desbloqueando vehículo");
+    }
+}
+
+function verGPSVehiculo(usuario){
+
+    if(!vehiculos[usuario]){
+        mostrarAlerta("No existe ubicación");
+        return;
+    }
+
+    // OCULTAR GEOCERCAS CUANDO PRESIONAS GPS
+    Object.values(geocercasMapa).forEach(lista => {
+        lista.forEach(circulo => {
+            mapa.removeLayer(circulo);
+        });
+    });
+
+    mapa.setView(
+        [
+            vehiculos[usuario].latitud,
+            vehiculos[usuario].longitud
+        ],
+        18
+    );
+
+    vehiculos[usuario].marker.openPopup();
+}
+function toggleHistorial(usuario){
+
+    const panel = document.getElementById("panel-historial-" + usuario);
+
+    if(panel.style.display === "none"){
+        panel.style.display = "block";
+    }else{
+        panel.style.display = "none";
+    }
+
+}
+
+function mostrarAlerta(texto){
+
+    const alerta = document.createElement("div");
+
+    alerta.innerHTML = `
+    <div style="
+        position:fixed;
+        top:20px;
+        left:50%;
+        transform:translateX(-50%);
+        background:#00c853;
+        color:white;
+        padding:18px 30px;
+        border-radius:15px;
+        font-size:18px;
+        z-index:99999;
+        box-shadow:0 0 20px rgba(0,255,0,0.4);
+    ">
+        ${texto}
+    </div>
+    `;
+
+    document.body.appendChild(alerta);
+
+    setTimeout(() => {
+        alerta.remove();
+    }, 3000);
+
+}
+
+async function verHistorial(usuario){
+
+    const divHistorial = document.getElementById("historial-" + usuario);
+
+    if(divHistorial.innerHTML !== ""){
+        divHistorial.innerHTML = "";
+        return;
+    }
+
+    const respuesta = await fetch("/historial/" + usuario);
+    const historial = await respuesta.json();
+
+    let html = "";
+
+    historial
+    .slice(-10)
+    .reverse()
+    .forEach(h => {
+
+        html += `
+        <div style="
+            background:rgba(255,255,255,0.08);
+            padding:10px;
+            margin-top:8px;
+            border-radius:10px;
+            font-size:12px;
+        ">
+
+            <b>${h.fecha}</b>
+            ${h.hora}<br>
+
+            Velocidad:
+            ${h.velocidad} km/h<br>
+
+            Km:
+            ${h.km}<br>
+
+            Estado:
+            ${h.estado}
+
+        </div>
+        `;
+
+    });
+
+    divHistorial.innerHTML = html;
+
+}
+
+async function consultarRecorrido(usuario){
+
+    const desde = document.getElementById("desde-" + usuario).value;
+    const hasta = document.getElementById("hasta-" + usuario).value;
+
+    const respuesta = await fetch(
+        `/recorrido/${usuario}?desde=${desde}&hasta=${hasta}`
+    );
+
+    const data = await respuesta.json();
+
+    console.log(data);
+
+    if (!data.puntos || data.puntos.length < 2) {
+
+        mostrarAlerta(
+            "No hay suficientes puntos GPS"
+        );
+
+        return;
+    }
+
+    let total = 0;
+
+    for (let i = 1; i < data.puntos.length; i++) {
+
+        const p1 = data.puntos[i - 1];
+        const p2 = data.puntos[i];
+
+        const dx = Number(p2.latitud) - Number(p1.latitud);
+        const dy = Number(p2.longitud) - Number(p1.longitud);
+
+        total += Math.sqrt(
+            dx * dx + dy * dy
+        ) * 111;
+    }
+
+    document.getElementById("recorrido-" + usuario).innerHTML =
+    `🚗 Recorrió: ${total.toFixed(2)} km`;
+
+    const coordenadas = data.puntos.map(p => [
+        Number(p.latitud),
+        Number(p.longitud)
+    ]);
+
+    if (window.rutaMapa) {
+        mapa.removeLayer(window.rutaMapa);
+    }
+
+    window.rutaMapa = L.polyline(
+        coordenadas,
+        {
+            color:'#00d4ff',
+            weight:5,
+            opacity:0.8,
+            smoothFactor:2
+        }
+    ).addTo(mapa);
+
+    if (window.marcadorAnimado) {
+        mapa.removeLayer(window.marcadorAnimado);
+    }
+
+    window.marcadorAnimado = L.marker(
+        coordenadas[0]
+    ).addTo(mapa);
+
+    let paso = 0;
+
+    const animacion = setInterval(() => {
+
+        paso++;
+
+        if (paso >= coordenadas.length) {
+            clearInterval(animacion);
+            return;
+        }
+
+        window.marcadorAnimado.setLatLng(
+            coordenadas[paso]
+        );
+
+    }, 120);
+
+    mapa.fitBounds(
+        window.rutaMapa.getBounds()
+    );
+
+}
+
+function abrirPerfil(){
+
+    mostrarAlerta(
+        "👤 Administrador principal"
+    );
+}
+
+function cambiarClave(){
+
+    const nueva = prompt(
+        "Ingrese nueva contraseña"
+    );
+
+    if(!nueva){
+        return;
+    }
+
+    localStorage.setItem(
+        "claveAdmin",
+        nueva
+    );
+
+    mostrarAlerta(
+        "✅ Contraseña actualizada"
+    );
+}
+
+function cambiarNombre(){
+
+    const usuarioActual = localStorage.getItem("usuario");
+
+    if(usuarioActual === "true"){
+
+        mostrarAlerta(
+            "❌ El administrador principal no puede cambiar nombre"
+        );
+
+        return;
+    }
+
+    const nuevoNombre = prompt(
+        "Ingrese nuevo nombre"
+    );
+
+    if(!nuevoNombre){
+        return;
+    }
+
+    localStorage.setItem(
+        "usuario",
+        nuevoNombre
+    );
+
+    document.getElementById(
+        "nombreUsuario"
+    ).innerText = nuevoNombre;
+
+    mostrarAlerta(
+        "✅ Nombre actualizado"
+    );
+
+    location.reload();
+}
+
+function editarVehiculo(id){
+
+    const nuevoNombre = prompt(
+        "Nuevo nombre del vehículo"
+    );
+
+    if(!nuevoNombre){
+        return;
+    }
+
+    document.getElementById(
+        "nombre-" + id
+    ).innerText = nuevoNombre;
+
+    localStorage.setItem(
+        "vehiculo-" + id,
+        nuevoNombre
+    );
+
+    mostrarAlerta(
+        "✅ Vehículo actualizado"
+    );
+}
+
+function cerrarSesion(){
+
+   localStorage.clear();
+
+   window.location.href =
+      "/login.html";
+}
+
+function toggleMenu(){
+
+   const menu =
+      document.getElementById("menuPerfil");
+
+   if(menu.style.display === "flex"){
+      menu.style.display = "none";
+   }else{
+      menu.style.display = "flex";
+   }
+}
+
+window.addEventListener("click", function(e){
+
+    const menu = document.getElementById("menuPerfil");
+    const boton = document.querySelector(".perfil-btn");
+    const esAdmin = localStorage.getItem("admin") === "true";
+
+    if(esAdmin){
+
+        const opciones = document.querySelectorAll("#menuPerfil button");
+
+        opciones.forEach(opcion => {
+
+            if(
+                opcion.innerText.includes("Cambiar nombre")
+            ){
+                opcion.style.display = "none";
+            }
+
+        });
+
+    }
+
+    if(
+        !menu.contains(e.target)
+        &&
+        !boton.contains(e.target)
+    ){
+        menu.style.display = "none";
+    }
+});
+
+async function cargarGeocercas(usuario){
+
+    const respuesta = await fetch("/geocercas/" + usuario);
+    const geocercas = await respuesta.json();
+
+    if(geocercasMapa[usuario]){
+        geocercasMapa[usuario].forEach(g => {
+            mapa.removeLayer(g);
+        });
+    }
+
+    geocercasMapa[usuario] = [];
+
+    geocercas.forEach(g => {
+
+        const circulo = L.circle(
+            [Number(g.latitud), Number(g.longitud)],
+            {
+                radius: Number(g.radio),
+                color: "#ff00ff",
+                fillColor: "#ff00ff",
+                fillOpacity: 0.25,
+                weight: 3
+            }
+        ).addTo(mapa);
+
+        circulo.bindPopup(`
+    <b>${g.nombre}</b><br>
+    Radio: ${g.radio} metros<br>
+    Vehículo: ${g.usuario}<br><br>
+
+    <button onclick="editarGeocerca(${g.id})">
+        ✏️ Editar
+    </button>
+
+    <button onclick="eliminarGeocerca(${g.id}, '${g.usuario}')">
+        🗑️ Eliminar
+    </button>
+`);
+
+        geocercasMapa[usuario].push(circulo);
+    });
+}
+
+function generarPdfHistorial(usuario){
+
+    const desde = document.getElementById(
+        "desde-" + usuario
+    ).value;
+
+    const hasta = document.getElementById(
+        "hasta-" + usuario
+    ).value;
+
+    if(!desde || !hasta){
+        alert("Selecciona fecha y hora desde / hasta");
+        return;
+    }
+
+    window.open(
+        `/pdf/historial/${usuario}?desde=${desde}&hasta=${hasta}`,
+        "_blank"
+    );
+}
+
+async function crearGeocerca(usuario, latitud, longitud){
+
+    const nombre = prompt("Nombre de la geocerca:");
+
+    if(!nombre){
+        return;
+    }
+
+    const radio = prompt("Radio en metros:", "200");
+
+    if(!radio){
+        return;
+    }
+
+    const respuesta = await fetch("/geocerca", {
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            usuario,
+            nombre,
+            latitud,
+            longitud,
+            radio
+        })
+    });
+
+    const data = await respuesta.json();
+
+   if(data.ok){
+        mostrarAlerta("✅ Geocerca creada correctamente");
+        cargarGeocercas(usuario);
+        mapa.setView([latitud, longitud], 16);
+    }else{
+        mostrarAlerta("❌ No se pudo crear geocerca");
+    }
+}
+
+cargarVehiculosIniciales();
+
+socket.on("recibir-ubicacion", (data) => {
+    procesarVehiculo(data);
+});
+async function eliminarGeocerca(id, usuario){
+
+    if(!confirm("¿Eliminar geocerca?")){
+        return;
+    }
+
+    const respuesta = await fetch(
+        "/geocerca/" + id,
+        {
+            method:"DELETE"
+        }
+    );
+
+    const data = await respuesta.json();
+
+    if(data.ok){
+
+        mostrarAlerta("Geocerca eliminada");
+
+        cargarGeocercas(usuario);
+
+    }
+
+}
+
+async function editarGeocerca(id){
+
+    const nombre = prompt("Nuevo nombre");
+
+    if(!nombre) return;
+
+    const radio = prompt("Nuevo radio");
+
+    if(!radio) return;
+
+    const respuesta = await fetch(
+        "/geocerca/" + id,
+        {
+            method:"PUT",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                nombre,
+                radio
+            })
+        }
+    );
+
+    const data = await respuesta.json();
+
+    if(data.ok){
+
+        mostrarAlerta("Geocerca actualizada");
+
+        location.reload();
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

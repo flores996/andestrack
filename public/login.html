@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login - ANDES-TRACK</title>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet/dist/leaflet.css"
+    />
+
+    <script
+        src="https://unpkg.com/leaflet/dist/leaflet.js">
+    </script>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Segoe UI', sans-serif;
+        }
+
+        body{
+
+            width:100%;
+
+            height:100vh;
+
+            overflow:hidden;
+
+            background:linear-gradient(
+                135deg,
+                #0f172a,
+                #111827
+            );
+
+        }
+
+        #map{
+
+            width:100%;
+
+            height:100vh;
+
+            filter:
+                saturate(1.03)
+                contrast(1.01)
+                brightness(0.96);
+
+        }
+
+        .login-box{
+
+            position:absolute;
+
+            top:50%;
+
+            left:50%;
+
+            transform:translate(-50%, -50%);
+
+            width:390px;
+
+            padding:40px;
+
+            border-radius:30px;
+
+            z-index:9999;
+
+            background:rgba(15,23,42,0.88);
+
+            backdrop-filter:blur(18px);
+
+            border:1px solid rgba(255,255,255,0.08);
+
+            box-shadow:
+                0 0 40px rgba(0,255,213,0.12),
+                0 0 80px rgba(0,0,0,0.35);
+
+        }
+
+        .login-box h1{
+
+            text-align:center;
+
+            margin-bottom:8px;
+
+            font-size:52px;
+
+            font-weight:900;
+
+            letter-spacing:1px;
+
+            background:linear-gradient(
+                90deg,
+                #ffffff,
+                #7fffd4,
+                #00ffd5
+            );
+
+            -webkit-background-clip:text;
+
+            -webkit-text-fill-color:transparent;
+
+        }
+
+        .subtitulo{
+
+            text-align:center;
+
+            color:#9be7d8;
+
+            font-size:13px;
+
+            margin-bottom:24px;
+
+            letter-spacing:1px;
+
+            font-weight:500;
+
+        }
+
+        .login-box input{
+
+            width:100%;
+
+            padding:18px;
+
+            margin-bottom:20px;
+
+            border:none;
+
+            border-radius:16px;
+
+            background:#172036;
+
+            color:white;
+
+            font-size:17px;
+
+            outline:none;
+
+            transition:0.3s;
+
+            box-shadow:
+                inset 0 0 10px rgba(0,0,0,0.25);
+
+        }
+
+        .login-box input:focus{
+
+            border:1px solid #00ffd5;
+
+            box-shadow:
+                0 0 15px rgba(0,255,213,0.25);
+
+        }
+
+        .login-box input::placeholder{
+
+            color:#94a3b8;
+
+        }
+
+        .login-box button{
+
+            width:100%;
+
+            padding:18px;
+
+            border:none;
+
+            border-radius:18px;
+
+            background:linear-gradient(
+                90deg,
+                #19e3c4,
+                #17d8ff
+            );
+
+            color:#0f172a;
+
+            font-size:18px;
+
+            font-weight:900;
+
+            letter-spacing:1px;
+
+            cursor:pointer;
+
+            transition:0.3s;
+
+            box-shadow:
+                0 0 20px rgba(0,255,213,0.25);
+
+        }
+
+        .login-box button:hover{
+
+            transform:scale(1.03);
+
+            opacity:0.93;
+
+        }
+.recuperar{
+
+    margin-top:15px;
+
+    text-align:center;
+
+    color:#00ffd5;
+
+    cursor:pointer;
+
+    font-size:14px;
+
+    transition:0.3s;
+}
+
+.recuperar:hover{
+
+    color:white;
+
+    text-shadow:0 0 10px #00ffd5;
+}
+.recuperar-btn{
+
+    background:transparent !important;
+    border:none !important;
+    box-shadow:none !important;
+
+    width:auto !important;
+    height:auto !important;
+
+    padding:0 !important;
+    margin-top:12px;
+
+    color:#b8fff4 !important;
+
+    cursor:pointer;
+
+    font-size:14px;
+    font-weight:normal;
+
+}
+
+.recuperar-btn:hover{
+
+    color:white !important;
+    text-decoration:underline;
+
+    transform:none !important;
+
+}
+@media (max-width: 768px){
+
+    .login-box{
+        width:300px;
+        padding:24px;
+        border-radius:24px;
+
+        top:50%;
+        left:50%;
+        transform:translate(-50%, -50%);
+    }
+
+    .login-box h1{
+        font-size:38px;
+        margin-bottom:6px;
+    }
+
+    .subtitulo{
+        font-size:11px;
+        margin-bottom:18px;
+    }
+
+    .login-box input{
+        padding:13px;
+        font-size:14px;
+        margin-bottom:14px;
+        border-radius:13px;
+    }
+
+    .login-box button{
+        padding:14px;
+        font-size:14px;
+        border-radius:15px;
+    }
+
+    .recuperar-btn{
+        font-size:13px !important;
+        margin-top:12px;
+    }
+
+}
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+    <div class="login-box">
+
+        <h1>AndesTrack</h1>
+
+        <p class="subtitulo">
+            Tecnología GPS Inteligente
+        </p>
+
+        <input
+            type="text"
+            id="usuario"
+            placeholder="Usuario"
+        >
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Contraseña"
+        >
+
+        <button onclick="login()">
+            INGRESAR
+        </button>
+<button
+class="recuperar-btn"
+onclick="recuperarClave()"
+> 
+¿Olvidaste tu contraseña?
+</button>
+    </div>
+
+    <script>
+
+        const map = L.map("map").setView([-2.17, -79.90], 10);
+
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                attribution: "OpenStreetMap"
+            }
+        ).addTo(map);
+
+        for(let i = 0; i < 300; i++){
+
+            const lat = -2.17 + ((Math.random() - 0.5) * 1.2);
+
+            const lng = -79.90 + ((Math.random() - 0.5) * 1.2);
+
+            const colores = [
+                "#ff3b5c",
+                "#00ffd5",
+                "#38bdf8"
+            ];
+
+            const color = colores[
+                Math.floor(Math.random() * colores.length)
+            ];
+
+            L.circleMarker(
+                [lat, lng],
+                {
+                    radius:4,
+                    color:color,
+                    fillColor:color,
+                    fillOpacity:0.9
+                }
+            ).addTo(map);
+
+        }
+
+        async function login() {
+
+            const usuario = document
+                .getElementById("usuario")
+                .value
+                .trim();
+
+            const password = document
+                .getElementById("password")
+                .value
+                .trim();
+
+            if(!usuario || !password){
+
+                alert("Completa todos los campos");
+
+                return;
+
+            }
+
+            try {
+
+                const respuesta = await fetch("/login", {
+
+                    method:"POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body:JSON.stringify({
+                        usuario: usuario,
+                        password: password
+                    })
+
+                });
+
+                const data = await respuesta.json();
+
+                if(data.success){
+
+                    localStorage.setItem(
+                        "usuario",
+                        usuario
+                    );
+                    localStorage.setItem("password", password);
+
+                    localStorage.setItem(
+                        "gps",
+                        data.gps
+                    );
+                    localStorage.setItem(
+    "admin",
+    data.admin
+);
+
+if (
+    data.admin === true ||
+    data.admin === "true" ||
+    data.admin === 1
+) {
+    localStorage.setItem(
+        "adminUsuario",
+        data.usuario
+    );
+}
+
+localStorage.setItem(
+    "password",
+    password
+);
+
+                   if (data.admin === true || data.admin === "true" || data.admin === 1) {
+    window.location.href = "/admin.html";
+} else {
+    window.location.href = "/index.html";
+}
+
+                } else {
+
+                   alert(data.error || "Usuario o contraseña incorrectos");
+
+                }
+
+            } catch (error) {
+
+                console.log(error);
+
+                alert("Error conectando con servidor");
+            }
+    }
+async function recuperarClave(){
+
+    const dato = prompt(
+        "📩 Ingrese su correo o usuario"
+    );
+
+    if(!dato){
+        return;
+    }
+
+    try{
+
+        const respuesta = await fetch("/recuperar-password", {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                dato:dato
+            })
+        });
+
+        const data = await respuesta.json();
+
+        if(data.ok){
+            alert("✅ Revisa tu correo. Se envió tu contraseña.");
+        }else{
+            alert(data.error || "No se pudo recuperar la contraseña");
+        }
+
+    }catch(error){
+
+        console.log(error);
+        alert("Error conectando con el servidor");
+
+    }
+}
+        
+    </script>
+
+</body>
+
+</html>
