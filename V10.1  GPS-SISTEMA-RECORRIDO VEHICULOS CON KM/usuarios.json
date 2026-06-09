@@ -1,0 +1,54 @@
+[
+  {
+    "id": 1778892980586,
+    "usuario": "LUIS",
+    "password": "1234",
+    "gps": "GPS-01"
+  },
+  {
+    "id": 1778892991033,
+    "usuario": "ANDRES",
+    "password": "1234",
+    "gps": "GPS-02"
+  },
+  {
+    "id": 1778893001859,
+    "usuario": "LEO",
+    "password": "1234",
+    "gps": "GPS-03"
+  },
+  {
+    "id": 1778893010664,
+    "usuario": "PEDRO",
+    "password": "1234",
+    "gps": "GPS-04"
+  },
+  {
+    "id": 1778893020129,
+    "usuario": "JUSNEY",
+    "password": "1234",
+    "gps": "GPS-05"
+  },
+  {
+    "id": 1778893616880,
+    "usuario": "ANA",
+    "password": "1234",
+    "gps": "GPS-05"
+  },
+  {
+    "id": 1778893680008,
+    "usuario": "LEO CAMIONETA01",
+    "password": "1234",
+    "gps": "GPS-06"
+  },
+  {
+    "usuario": "julio",
+    "password": "1234",
+    "gps": "9"
+  },
+  {
+    "usuario": "andresss",
+    "password": "1234",
+    "gps": "10"
+  }
+]
