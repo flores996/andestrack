@@ -1,27 +1,16 @@
 const mysql = require("mysql2");
 
-const conexion = mysql.createConnection({
-
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "andestrack"
-
+const conexion = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-conexion.connect((error) => {
-
-    if(error){
-
-        console.log("❌ ERROR MYSQL");
-        console.log(error);
-
-    }else{
-
-        console.log("✅ MYSQL CONECTADO");
-
-    }
-
-});
+console.log("✅ MYSQL CONFIGURADO PARA RENDER");
 
 module.exports = conexion;
