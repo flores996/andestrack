@@ -1,16 +1,7 @@
 const mysql = require("mysql2");
 
-const db = mysql.createPool({
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-  port: Number(process.env.MYSQLPORT),
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
+const db = mysql.createPool(process.env.MYSQL_PUBLIC_URL);
 
-console.log("✅ MYSQL POOL RAILWAY LISTO");
+console.log("✅ MYSQL CONECTADO CON PUBLIC URL");
 
 module.exports = db;
