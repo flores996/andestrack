@@ -1,14 +1,14 @@
 const mysql = require("mysql2");
 
 const db = mysql.createPool({
-  host: "acela.proxy.rlwy.net",
-  user: "root",
-  password: "UP0UvTjPnSprIJkAYrkPhUPvrfSMLfuH",
-  database: "railway",
-  port: 29094,
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  port: Number(process.env.MYSQLPORT),
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
 });
 
 console.log("✅ MYSQL POOL RAILWAY LISTO");
