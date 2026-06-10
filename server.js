@@ -1,5 +1,6 @@
 const db = require("./mysql");
 const http = require("http");
+const net = require("net");
 const { Server } = require("socket.io");
 const express = require("express");
 const cors = require("cors");
@@ -1204,7 +1205,33 @@ io.on("connection", () => {
 // ===============================
 // ACTUALIZAR GPS AUTOMÁTICO
 // ===============================
+// ===============================
+// RECEPTOR TCP GPS EC33
+// ===============================
+const TCP_PORT = process.env.TCP_PORT || 5001;
 
+const tcpServer = net.createServer((socket) => {
+  console.log("📡 GPS conectado:", socket.remoteAddress);
+
+  socket.on("data", (data) => {
+    const mensaje = data.toString("utf8").trim();
+    console.log("📍 Datos GPS recibidos:", mensaje);
+
+    // Aquí luego convertimos el mensaje real del EC33 a latitud/longitud
+  });
+
+  socket.on("end", () => {
+    console.log("🔌 GPS desconectado");
+  });
+
+  socket.on("error", (err) => {
+    console.log("❌ Error TCP GPS:", err.message);
+  });
+});
+
+tcpServer.listen(TCP_PORT, "0.0.0.0", () => {
+  console.log("✅ Receptor TCP GPS escuchando en puerto " + TCP_PORT);
+});
 // ===============================
 // INICIAR SERVIDOR
 // ===============================
