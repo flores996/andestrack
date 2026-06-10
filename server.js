@@ -6,30 +6,17 @@ const cors = require("cors");
 const nodemailer = require("nodemailer");
 const PDFDocument = require("pdfkit");
 
-db.connect((error) => {
-  if (error) {
-    console.log("❌ ERROR MYSQL");
-    console.log(error);
-  } else {
-    console.log("✅ MYSQL CONECTADO RAILWAY");
+const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*"
   }
 });
 
-module.exports = db;
-const http = require("http");
-const { Server } = require("socket.io");
-const express = require("express");
-const cors = require("cors");
-const nodemailer = require("nodemailer");
-const PDFDocument = require("pdfkit");
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: "*" },
-});
-
 const PORT = process.env.PORT || 3000;
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
@@ -105,7 +92,7 @@ res.json(activos);
 });
 // ===============================
 // CREAR VEHÍCULO
-// ===============================gin
+// ===============================
 app.post("/vehiculos", (req, res) => {
   const {
     usuario,
