@@ -1219,17 +1219,7 @@ io.on("connection", () => {
 // ===============================
 // ACTUALIZAR GPS AUTOMÁTICO
 // ===============================
-setInterval(async () => {
-  try {
-    await fetch(`http://127.0.0.1:${PORT}/actualizar-gps`, {
-      method: "PUT",
-    });
 
-    console.log("GPS actualizado");
-  } catch (error) {
-    console.log("Error actualizando GPS automático:", error);
-  }
-}, 8000);
 // ===============================
 // INICIAR SERVIDOR
 // ===============================
