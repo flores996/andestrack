@@ -831,7 +831,7 @@ async function cargarVehiculosIniciales(){
 
     try{
 
-const respuesta = await fetch("/vehiculos");
+        const respuesta = await fetch("/traccar/vehiculos");
         const lista = await respuesta.json();
 
         console.log("VEHÍCULOS TRACCAR:", lista);
