@@ -1070,7 +1070,15 @@ cursor:pointer;
 <p style="font-size:11px;color:#fbbf24;">
     ⏳ Vence: ${fechaLimpia(data.fecha_vencimiento)}
 </p>
+<p>
+Lat:
+${data.latitud}
+</p>
 
+<p>
+Lng:
+${data.longitud}
+</p>
     <div class="controles-motor">
 
 <button
@@ -1845,7 +1853,7 @@ cargarVehiculosIniciales();
 
 setInterval(() => {
     cargarVehiculosIniciales();
-}, 5000);
+}, 1000);
 socket.on("recibir-ubicacion", (data) => {
     procesarVehiculo(data);
 });
