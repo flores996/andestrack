@@ -78,8 +78,7 @@ app.get("/traccar/vehiculos", async (req, res) => {
       return res.json([]);
     }
 
-    const auth = "Basic " + Buffer.from(`${user}:${pass}`).toString("base64");
-
+const auth = "Basic " + Buffer.from(`${user}:${pass}`).toString("base64");
     const devicesRes = await fetch("http://194.238.25.152:8082/api/devices", {
       headers: { Authorization: auth }
     });
