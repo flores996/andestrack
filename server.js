@@ -6,7 +6,7 @@ const express = require("express");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
 const PDFDocument = require("pdfkit");
-const fetch = require("node-fetch");
+const fetch = global.fetch;
 
 const app = express();
 const server = http.createServer(app);
