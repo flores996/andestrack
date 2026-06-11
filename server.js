@@ -6,6 +6,7 @@ const express = require("express");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
 const PDFDocument = require("pdfkit");
+const fetch = require("node-fetch");
 
 const app = express();
 const server = http.createServer(app);
@@ -66,6 +67,65 @@ app.get("/vehiculos", (req, res) => {
 
     res.json(results);
   });
+});
+app.get("/traccar/vehiculos", async (req, res) => {
+
+  try {
+
+    const auth = "Basic " + Buffer.from(
+      process.env.TRACCAR_USER + ":" + process.env.TRACCAR_PASS
+    ).toString("base64");
+
+    const devicesRes = await fetch("http://194.238.25.152:8082/api/devices", {
+      headers: {
+        Authorization: auth
+      }
+    });
+
+    const positionsRes = await fetch("http://194.238.25.152:8082/api/positions", {
+      headers: {
+        Authorization: auth
+      }
+    });
+
+    const listaDevices = await devicesRes.json();
+    const listaPositions = await positionsRes.json();
+
+    const resultado = listaDevices.map(device => {
+
+      const pos = listaPositions.find(p => p.deviceId === device.id);
+
+      return {
+        usuario: device.name,
+        placa: device.name,
+        tipo: "auto",
+        gps: 1,
+        imei: device.uniqueId,
+
+        latitud: pos ? pos.latitude : 0,
+        longitud: pos ? pos.longitude : 0,
+
+        velocidad: pos ? Math.round(pos.speed * 1.852) : 0,
+
+        estado: device.status === "online" ? "activo" : "apagado",
+
+        km: pos ? ((pos.attributes.totalDistance || 0) / 1000).toFixed(2) : 0,
+
+        motor: "encendido",
+        fecha_creacion: "2026-06-10",
+        fecha_vencimiento: "2030-12-28",
+        estado_pago: "activo"
+      };
+
+    });
+
+    res.json(resultado);
+
+  } catch (error) {
+    console.log("ERROR TRACCAR:", error);
+    res.status(500).json([]);
+  }
+
 });
 // ===============================
 // VEHÍCULOS POR GPS / CLIENTE

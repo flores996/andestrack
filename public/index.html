@@ -831,30 +831,20 @@ async function cargarVehiculosIniciales(){
 
     try{
 
-        const gpsUsuario = localStorage.getItem("gps");
-        const admin = localStorage.getItem("admin");
-
-        let url = "/vehiculos/gps/" + gpsUsuario;
-
-        if(admin === "true" || admin === "1"){
-            url = "/vehiculos";
-        }
-
-        const respuesta = await fetch(url);
+        const respuesta = await fetch("/traccar/vehiculos");
         const lista = await respuesta.json();
 
-        console.log(lista);
+        console.log("VEHÍCULOS TRACCAR:", lista);
 
         lista.forEach(data => {
             procesarVehiculo(data);
         });
 
     }catch(error){
-        console.log(error);
+        console.log("ERROR TRACCAR:", error);
     }
 
 }
-
 function actualizarContadores() {
 
     let activos = 0;
@@ -1844,6 +1834,9 @@ async function crearGeocerca(usuario, latitud, longitud){
 
 cargarVehiculosIniciales();
 
+setInterval(() => {
+    cargarVehiculosIniciales();
+}, 5000);
 socket.on("recibir-ubicacion", (data) => {
     procesarVehiculo(data);
 });
