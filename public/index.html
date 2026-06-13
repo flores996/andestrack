@@ -1216,19 +1216,10 @@ margin-top:10px;
         ) * 180 / Math.PI;
 
 markerActual.setRotationAngle(0);
-        if(typeof markerActual.slideTo === "function"){
-            markerActual.slideTo(
-                [Number(data.latitud), Number(data.longitud)],
-                {
-                    duration: 7000
-                }
-            );
-        }else{
-            markerActual.setLatLng([
-                Number(data.latitud),
-                Number(data.longitud)
-            ]);
-        }
+        markerActual.setLatLng([
+    Number(data.latitud),
+    Number(data.longitud)
+]);
 
         document.getElementById("vel-" + id).innerText = data.velocidad;
         document.getElementById("estado-" + id).innerText = data.estado;
