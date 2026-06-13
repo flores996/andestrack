@@ -798,8 +798,11 @@ function fechaLimpia(fecha){
     return String(fecha).split("T")[0];
 }
 
-const usuario = localStorage.getItem("usuario") || "true";
+const usuario = localStorage.getItem("usuario");
 
+if(!usuario){
+   window.location.href="/login.html";
+}
 document.getElementById("nombreUsuario").innerText = usuario;
 
 const gps = localStorage.getItem("gps");
