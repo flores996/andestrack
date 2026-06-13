@@ -619,6 +619,10 @@ body{
     }
 
 }
+.cliente.detenido{
+    border-left:5px solid #facc15;
+    box-shadow:0 0 18px rgba(250,204,21,0.35);
+}
 </style>
 </head>
 
@@ -880,18 +884,15 @@ data.length;
 
     // RECORRER VEHICULOS
     data.forEach(v => {
+        let estadoVisual = v.estado;
+
+if(Number(v.velocidad) <= 5 && v.motor === "encendido"){
+    estadoVisual = "detenido";
+}
 
         document.getElementById('clientes').innerHTML += `
 
-<div class="cliente ${
-v.estado_pago === 'suspendido' ||
-v.estado === 'apagado' ||
-v.estado === 'bloqueado' ||
-v.motor === 'apagado' ||
-new Date(v.fecha_vencimiento) < new Date()
-? 'apagado'
-: 'activo'
-}">           
+<div class="cliente ${estadoVisual}">      
 <h3 style="font-size:22px;color:white;margin-bottom:8px;">
 👤 ${v.usuario}
 </h3>
