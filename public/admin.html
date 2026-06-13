@@ -862,7 +862,7 @@ function obtenerIcono(tipo){
 
 async function cargarClientes(){
 
-const respuesta = await fetch("/traccar/vehiculos");
+const respuesta = await fetch("/traccar/vehiculos?nocache=" + Date.now());
     const data = await respuesta.json();
 
     // CONTADORES
@@ -1364,18 +1364,10 @@ async function renovarServicio(usuario){
 // ACTUALIZAR
 // ======================================
 
-setInterval(async()=>{
-
-    await fetch('/actualizar-gps',{
-
-        method:'PUT'
-
-    });
-
+setInterval(() => {
     cargarClientes();
     cargarAlertasGenerales();
-
-},2000);
+}, 2000);
 
 // ======================================
 // INICIO
