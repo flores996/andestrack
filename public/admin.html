@@ -862,9 +862,8 @@ function obtenerIcono(tipo){
 
 async function cargarClientes(){
 
-    const res = await fetch('/vehiculos');
-
-    const data = await res.json();
+const respuesta = await fetch("/traccar/vehiculos");
+    const data = await respuesta.json();
 
     // CONTADORES
 
@@ -1376,7 +1375,7 @@ setInterval(async()=>{
     cargarClientes();
     cargarAlertasGenerales();
 
-},5000);
+},2000);
 
 // ======================================
 // INICIO
