@@ -1142,8 +1142,7 @@ modelo_gps,
     placa,
     tipo,
     adminUsuario,
-    adminPassword: localStorage.getItem("password")
-})
+adminPassword: prompt("Contraseña del administrador")})
     });
 
     const data = await res.json();
