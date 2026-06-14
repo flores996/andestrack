@@ -74,11 +74,12 @@ app.get("/traccar/vehiculos", async (req, res) => {
     const pass = process.env.TRACCAR_PASS;
 
     if (!user || !pass) {
-      console.log("❌ Faltan TRACCAR_USER o TRACCAR_PASS en Render");
+      console.log("❌ Faltan TRACCAR_USER o TRACCAR_PASS");
       return res.json([]);
     }
 
-const auth = "Basic " + Buffer.from(`${user}:${pass}`).toString("base64");
+    const auth = "Basic " + Buffer.from(`${user}:${pass}`).toString("base64");
+
     const devicesRes = await fetch("http://194.238.25.152:8082/api/devices", {
       headers: { Authorization: auth }
     });
@@ -87,40 +88,47 @@ const auth = "Basic " + Buffer.from(`${user}:${pass}`).toString("base64");
       headers: { Authorization: auth }
     });
 
-    console.log("STATUS DEVICES:", devicesRes.status);
-    console.log("STATUS POSITIONS:", positionsRes.status);
+    const listaDevices = await devicesRes.json();
+    const listaPositions = await positionsRes.json();
 
-    const devicesText = await devicesRes.text();
-    const positionsText = await positionsRes.text();
+    db.query("SELECT * FROM vehiculos", (err, vehiculosDB) => {
+      if (err) {
+        console.log("Error leyendo DB:", err);
+        return res.json([]);
+      }
 
-    console.log("DEVICES TEXT:", devicesText.substring(0, 300));
-    console.log("POSITIONS TEXT:", positionsText.substring(0, 300));
+      const resultado = listaDevices.map(device => {
+        const pos = listaPositions.find(p => p.deviceId === device.id);
+        const extra = vehiculosDB.find(v => String(v.imei) === String(device.uniqueId));
 
-    const listaDevices = JSON.parse(devicesText);
-    const listaPositions = JSON.parse(positionsText);
+        return {
+          id: extra ? extra.id : null,
 
-    const resultado = listaDevices.map(device => {
-      const pos = listaPositions.find(p => p.deviceId === device.id);
+          usuario: extra?.usuario || device.name,
+          password: extra?.password || "",
+          correo: extra?.correo || "",
+          placa: extra?.placa || device.name,
+          tipo: extra?.tipo || "auto",
+          gps: extra?.gps || 1,
+          imei: device.uniqueId,
+          modelo_gps: extra?.modelo_gps || "No registrado",
 
-      return {
-        usuario: device.name,
-        placa: device.name,
-        tipo: "auto",
-        gps: 1,
-        imei: device.uniqueId,
-        latitud: pos ? pos.latitude : 0,
-        longitud: pos ? pos.longitude : 0,
-        velocidad: pos ? Math.round(pos.speed * 1.852) : 0,
-        estado: device.status === "online" ? "activo" : "apagado",
-        km: pos ? ((pos.attributes.totalDistance || 0) / 1000).toFixed(2) : 0,
-        motor: "encendido",
-        fecha_creacion: "2026-06-10",
-        fecha_vencimiento: "2030-12-28",
-        estado_pago: "activo"
-      };
+          latitud: pos ? pos.latitude : 0,
+          longitud: pos ? pos.longitude : 0,
+          velocidad: pos ? Math.round(pos.speed * 1.852) : 0,
+          estado: device.status === "online" ? "activo" : "apagado",
+          km: pos ? ((pos.attributes.totalDistance || 0) / 1000).toFixed(2) : 0,
+
+          motor: extra?.motor || "encendido",
+          bloqueo: extra?.bloqueo || "desbloqueado",
+          fecha_creacion: extra?.fecha_creacion || new Date().toISOString().split("T")[0],
+          fecha_vencimiento: extra?.fecha_vencimiento || "2030-12-28",
+          estado_pago: extra?.estado_pago || "activo"
+        };
+      });
+
+      res.json(resultado);
     });
-
-    res.json(resultado);
 
   } catch (error) {
     console.log("ERROR TRACCAR REAL:", error);
@@ -300,6 +308,98 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)          `;
           );
         }
       );
+    }
+  );
+});
+
+// ===============================
+// EDITAR / COMPLETAR VEHÍCULO POR IMEI
+// ===============================
+app.put("/vehiculos/imei/:imei", (req, res) => {
+  const imeiActual = req.params.imei;
+
+  const {
+    usuario,
+    password,
+    correo,
+    fecha_creacion,
+    fecha_vencimiento,
+    gps,
+    modelo_gps,
+    placa,
+    tipo
+  } = req.body;
+
+  db.query(
+    "SELECT * FROM vehiculos WHERE imei = ?",
+    [imeiActual],
+    (err, results) => {
+      if (err) {
+        console.log("Error buscando IMEI:", err);
+        return res.json({ ok: false });
+      }
+
+      if (results.length > 0) {
+        db.query(
+          `
+          UPDATE vehiculos
+          SET usuario = ?, password = ?, correo = ?, fecha_creacion = ?,
+              fecha_vencimiento = ?, gps = ?, modelo_gps = ?, placa = ?, tipo = ?
+          WHERE imei = ?
+          `,
+          [
+            usuario,
+            password,
+            correo,
+            fecha_creacion,
+            fecha_vencimiento,
+            gps,
+            modelo_gps,
+            placa,
+            tipo,
+            imeiActual
+          ],
+          (err2) => {
+            if (err2) {
+              console.log("Error actualizando vehículo:", err2);
+              return res.json({ ok: false });
+            }
+
+            res.json({ ok: true });
+          }
+        );
+      } else {
+        db.query(
+          `
+          INSERT INTO vehiculos
+          (usuario, password, correo, fecha_creacion, fecha_vencimiento,
+           estado_pago, gps, imei, modelo_gps, placa, admin, tipo,
+           estado, bloqueo, motor, pasoRuta, velocidad, km, latitud, longitud)
+          VALUES (?, ?, ?, ?, ?, 'activo', ?, ?, ?, ?, 0, ?, 'activo',
+          'desbloqueado', 'encendido', 0, 0, 0, 0, 0)
+          `,
+          [
+            usuario,
+            password,
+            correo,
+            fecha_creacion,
+            fecha_vencimiento,
+            gps,
+            imeiActual,
+            modelo_gps,
+            placa,
+            tipo
+          ],
+          (err3) => {
+            if (err3) {
+              console.log("Error insertando vehículo:", err3);
+              return res.json({ ok: false });
+            }
+
+            res.json({ ok: true });
+          }
+        );
+      }
     }
   );
 });

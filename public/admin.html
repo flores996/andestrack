@@ -10,6 +10,7 @@ href="https://unpkg.com/leaflet/dist/leaflet.css"
 
 <title>AndesTrack Admin</title>
 
+
 <script
 src="https://unpkg.com/leaflet/dist/leaflet.js">
 </script>
@@ -888,19 +889,41 @@ const vehiculosTraccar = await resTraccar.json();
 const resBase = await fetch("/vehiculos?nocache=" + Date.now());
 const vehiculosBase = await resBase.json();
 
-const data = [
-    ...vehiculosBase,
-    ...vehiculosTraccar
-];
+const mapaTraccar = {};
 
-const sinDuplicados = {};
-
-data.forEach(v => {
-    const clave = v.imei || v.usuario || v.placa;
-    sinDuplicados[clave] = v;
+vehiculosTraccar.forEach(t => {
+    if(t.imei){
+        mapaTraccar[t.imei] = t;
+    }
 });
 
-const listaFinal = Object.values(sinDuplicados);
+const listaFinal = vehiculosBase.map(b => {
+    const real = mapaTraccar[b.imei];
+
+    if(real){
+        return {
+            ...b,
+            latitud: real.latitud,
+            longitud: real.longitud,
+            velocidad: real.velocidad,
+            estado: real.estado,
+            km: real.km,
+            motor: real.motor,
+            conectado_traccar: true
+        };
+    }
+
+    return {
+        ...b,
+        latitud: null,
+        longitud: null,
+        velocidad: 0,
+        estado: "sin_senal",
+        km: 0,
+        motor: "sin señal",
+        conectado_traccar: false
+    };
+});
     // CONTADORES
 
    document.getElementById('totalGps').innerText =
@@ -967,8 +990,13 @@ v.estado_pago === "suspendido"
 
             <p>🗺️ KM: ${Number(v.km).toFixed(2)}</p>
 
-           <p>📍 Ubicación GPS activa</p>
-            <div class="acciones">
+<p>
+${
+v.conectado_traccar
+? "✅ GPS conectado a Traccar"
+: "⚠️ Sin señal Traccar / IMEI no encontrado"
+}
+</p>            <div class="acciones">
 
                 <button
 class="btn-on"
@@ -1007,6 +1035,11 @@ ${v.estado === 'bloqueado' ? 'disabled' : ''}>
                 onclick="eliminarCliente(${v.id})">
                 🗑️ Eliminar
                 </button>
+                <button
+onclick="editarCliente('${v.imei}')"
+style="background:#0ea5e9;">
+✏️ Editar
+</button>
 <button
 onclick="renovarServicio('${v.usuario}')"
 style="
@@ -1046,6 +1079,9 @@ style="background:linear-gradient(135deg,#16a34a,#22c55e);">
         `;
 
         // CREAR MARCADOR
+        if(!v.conectado_traccar || !v.latitud || !v.longitud){
+    return;
+}
 
         const marker = L.marker(
             [v.latitud, v.longitud],
@@ -1142,7 +1178,8 @@ modelo_gps,
     placa,
     tipo,
     adminUsuario,
-adminPassword: prompt("Contraseña del administrador")})
+adminPassword: localStorage.getItem("password")
+})
     });
 
     const data = await res.json();
@@ -1486,6 +1523,70 @@ async function activarServicio(usuario) {
   } else {
     alert(data.error || "No se pudo activar");
   }
+}
+async function editarCliente(imei){
+
+    const res = await fetch("/traccar/vehiculos?nocache=" + Date.now());
+    const lista = await res.json();
+
+    const v = lista.find(x => String(x.imei) === String(imei));
+
+    if(!v){
+        alert("No encontré este GPS por IMEI");
+        return;
+    }
+
+    const usuario = prompt("Usuario / nombre cliente:", v.usuario || "");
+    if(!usuario) return;
+
+    const password = prompt("Contraseña del cliente:", v.password || "");
+    if(!password) return;
+
+    const correo = prompt("Correo del cliente:", v.correo || "");
+    if(!correo) return;
+
+    const fecha_creacion = prompt("Fecha creación YYYY-MM-DD:", fechaLimpia(v.fecha_creacion));
+    if(!fecha_creacion) return;
+
+    const fecha_vencimiento = prompt("Fecha vencimiento YYYY-MM-DD:", fechaLimpia(v.fecha_vencimiento));
+    if(!fecha_vencimiento) return;
+
+    const gps = prompt("GPS asignado / empresa:", v.gps || "1");
+    if(!gps) return;
+
+    const modelo_gps = prompt("Modelo GPS:", v.modelo_gps || "");
+    const placa = prompt("Placa:", v.placa || "");
+    if(!placa) return;
+
+    const tipo = prompt("Tipo: auto, camion, bus, moto", v.tipo || "auto");
+    if(!tipo) return;
+
+    const respuesta = await fetch("/vehiculos/imei/" + imei, {
+        method:"PUT",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            usuario,
+            password,
+            correo,
+            fecha_creacion,
+            fecha_vencimiento,
+            gps,
+            modelo_gps,
+            placa,
+            tipo
+        })
+    });
+
+    const data = await respuesta.json();
+
+    if(data.ok){
+        alert("✅ Cliente actualizado correctamente");
+        cargarClientes();
+    }else{
+        alert("❌ No se pudo actualizar");
+    }
 }
 </script>
 
