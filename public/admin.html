@@ -884,10 +884,18 @@ data.length;
 
     // RECORRER VEHICULOS
     data.forEach(v => {
-        let estadoVisual = v.estado;
+       let estadoVisual = "activo";
 
-if(Number(v.velocidad) <= 5 && v.motor === "encendido"){
+if(Number(v.velocidad) <= 5){
     estadoVisual = "detenido";
+}
+
+if(v.estado === "apagado" && Number(v.velocidad) > 5){
+    estadoVisual = "apagado";
+}
+
+if(v.estado === "bloqueado" || v.estado_pago === "suspendido"){
+    estadoVisual = "apagado";
 }
 
         document.getElementById('clientes').innerHTML += `
@@ -920,7 +928,7 @@ v.estado_pago === "suspendido"
 : "🟢 Estado de pago: ACTIVO"
 }
 </p>
-
+<p>📍 Estado visual: ${estadoVisual}</p>
             <p>🔌 Motor: ${v.motor}</p>
 
             <p>🚀 Velocidad: ${v.velocidad} km/h</p>
