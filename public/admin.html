@@ -1088,7 +1088,11 @@ style="background:linear-gradient(135deg,#16a34a,#22c55e);">
         `;
 
         // CREAR MARCADOR
-        if(!v.conectado_traccar || !v.latitud || !v.longitud){
+       if(
+    !v.conectado_traccar ||
+    v.latitud === null ||
+    v.longitud === null
+){
     return;
 }
 
