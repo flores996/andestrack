@@ -620,6 +620,7 @@ body{
 
 }
 .cliente.detenido{
+    
     border-left:5px solid #facc15;
     animation:parpadeoDetenido 1s infinite;
     box-shadow:0 0 18px rgba(250,204,21,0.35);
@@ -881,13 +882,29 @@ function obtenerIcono(tipo){
 
 async function cargarClientes(){
 
-const respuesta = await fetch("/traccar/vehiculos?nocache=" + Date.now());
-    const data = await respuesta.json();
+const resTraccar = await fetch("/traccar/vehiculos?nocache=" + Date.now());
+const vehiculosTraccar = await resTraccar.json();
 
+const resBase = await fetch("/vehiculos?nocache=" + Date.now());
+const vehiculosBase = await resBase.json();
+
+const data = [
+    ...vehiculosBase,
+    ...vehiculosTraccar
+];
+
+const sinDuplicados = {};
+
+data.forEach(v => {
+    const clave = v.imei || v.usuario || v.placa;
+    sinDuplicados[clave] = v;
+});
+
+const listaFinal = Object.values(sinDuplicados);
     // CONTADORES
 
-    document.getElementById('totalGps').innerText =
-data.length;
+   document.getElementById('totalGps').innerText =
+listaFinal.length;
 
     // LIMPIAR CLIENTES
     document.getElementById('clientes').innerHTML = '';
@@ -898,7 +915,7 @@ data.length;
     markers = [];
 
     // RECORRER VEHICULOS
-    data.forEach(v => {
+    listaFinal.forEach(v => {
        let estadoVisual = "activo";
 
 if(Number(v.velocidad) <= 5){
