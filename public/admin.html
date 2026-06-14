@@ -621,7 +621,22 @@ body{
 }
 .cliente.detenido{
     border-left:5px solid #facc15;
+    animation:parpadeoDetenido 1s infinite;
     box-shadow:0 0 18px rgba(250,204,21,0.35);
+}
+
+@keyframes parpadeoDetenido{
+    0%{
+        box-shadow:0 0 10px rgba(250,204,21,0.20);
+    }
+
+    50%{
+        box-shadow:0 0 28px rgba(250,204,21,0.70);
+    }
+
+    100%{
+        box-shadow:0 0 10px rgba(250,204,21,0.20);
+    }
 }
 </style>
 </head>
