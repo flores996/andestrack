@@ -834,7 +834,7 @@ async function cargarVehiculosIniciales(){
 
     try{
 
-        const respuesta = await fetch("/traccar/vehiculos");
+const respuesta = await fetch("/vehiculos/gps/" + gps + "?nocache=" + Date.now());
         const lista = await respuesta.json();
 
         console.log("VEHÍCULOS TRACCAR:", lista);

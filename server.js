@@ -403,6 +403,69 @@ app.put("/vehiculos/imei/:imei", (req, res) => {
     }
   );
 });
+app.put("/vehiculos/imei/:imei", (req, res) => {
+  const imei = req.params.imei;
+
+  const {
+    usuario,
+    password,
+    correo,
+    fecha_creacion,
+    fecha_vencimiento,
+    gps,
+    modelo_gps,
+    placa,
+    tipo
+  } = req.body;
+
+  db.query(
+    "SELECT * FROM vehiculos WHERE imei = ? LIMIT 1",
+    [imei],
+    (err, results) => {
+      if (err) {
+        console.log("Error buscando IMEI:", err);
+        return res.status(500).json({ ok:false });
+      }
+
+      if (results.length > 0) {
+        db.query(
+          `
+          UPDATE vehiculos
+          SET usuario=?, password=?, correo=?, fecha_creacion=?, fecha_vencimiento=?,
+              gps=?, modelo_gps=?, placa=?, tipo=?
+          WHERE imei=?
+          `,
+          [usuario, password, correo, fecha_creacion, fecha_vencimiento, gps, modelo_gps, placa, tipo, imei],
+          (err2) => {
+            if (err2) {
+              console.log("Error actualizando IMEI:", err2);
+              return res.status(500).json({ ok:false });
+            }
+
+            res.json({ ok:true });
+          }
+        );
+      } else {
+        db.query(
+          `
+          INSERT INTO vehiculos
+          (usuario,password,correo,fecha_creacion,fecha_vencimiento,estado_pago,gps,imei,modelo_gps,placa,admin,tipo,estado,bloqueo,motor,pasoRuta,velocidad,km,latitud,longitud)
+          VALUES (?,?,?,?,?,'activo',?,?,?,?,0,?,'activo','desbloqueado','encendido',0,0,0,0,0)
+          `,
+          [usuario, password, correo, fecha_creacion, fecha_vencimiento, gps, imei, modelo_gps, placa, tipo],
+          (err3) => {
+            if (err3) {
+              console.log("Error insertando IMEI:", err3);
+              return res.status(500).json({ ok:false });
+            }
+
+            res.json({ ok:true });
+          }
+        );
+      }
+    }
+  );
+});
 // ===============================
 // ELIMINAR VEHÍCULO SOLO ADMIN
 // ===============================

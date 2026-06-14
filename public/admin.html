@@ -897,31 +897,40 @@ vehiculosTraccar.forEach(t => {
     }
 });
 
-const listaFinal = vehiculosBase.map(b => {
-    const real = mapaTraccar[b.imei];
+const mapaBase = {};
 
-    if(real){
+vehiculosBase.forEach(b => {
+    if(b.imei){
+        mapaBase[b.imei] = b;
+    }
+});
+
+const listaFinal = vehiculosTraccar.map(t => {
+    const base = mapaBase[t.imei];
+
+    if(base){
         return {
-            ...b,
-            latitud: real.latitud,
-            longitud: real.longitud,
-            velocidad: real.velocidad,
-            estado: real.estado,
-            km: real.km,
-            motor: real.motor,
+            ...t,
+            ...base,
+            latitud: t.latitud,
+            longitud: t.longitud,
+            velocidad: t.velocidad,
+            estado: t.estado,
+            km: t.km,
+            motor: t.motor,
             conectado_traccar: true
         };
     }
 
     return {
-        ...b,
-        latitud: null,
-        longitud: null,
-        velocidad: 0,
-        estado: "sin_senal",
-        km: 0,
-        motor: "sin señal",
-        conectado_traccar: false
+        ...t,
+        password:"",
+        correo:"",
+        modelo_gps:"",
+        estado_pago:"activo",
+        fecha_creacion:"2026-06-10",
+        fecha_vencimiento:"2030-12-28",
+        conectado_traccar:true
     };
 });
     // CONTADORES
@@ -1222,8 +1231,9 @@ async function eliminarCliente(id){
             "Content-Type":"application/json"
         },
         body: JSON.stringify({
-            adminUsuario
-        })
+    adminUsuario,
+    adminPassword: localStorage.getItem("password")
+})
     });
 
     const data = await res.json();
