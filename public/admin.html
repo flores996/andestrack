@@ -892,8 +892,13 @@ const vehiculosBase = await resBase.json();
 const mapaTraccar = {};
 
 vehiculosTraccar.forEach(t => {
-    if(t.imei){
-        mapaTraccar[t.imei] = t;
+    const imeiTraccar = t.imei || t.uniqueId || t.deviceUniqueId;
+
+    if(imeiTraccar){
+        mapaTraccar[String(imeiTraccar)] = {
+            ...t,
+            imei: String(imeiTraccar)
+        };
     }
 });
 
@@ -906,7 +911,8 @@ vehiculosBase.forEach(b => {
 });
 
 const listaFinal = vehiculosTraccar.map(t => {
-    const base = mapaBase[t.imei];
+    const imeiTraccar = t.imei || t.uniqueId || t.deviceUniqueId;
+    t.imei = String(imeiTraccar || "");    const base = mapaBase[t.imei];
 
     if(base){
         return {
