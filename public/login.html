@@ -440,15 +440,22 @@ onclick="recuperarClave()"
     localStorage.setItem("gps", data.gps);
     localStorage.setItem("admin", data.admin);
 
-    if (
-        data.admin === true ||
-        data.admin === "true" ||
-        data.admin === 1
-    ) {
-        window.location.href = "/admin.html";
-    } else {
-        window.location.href = "/index.html";
-    }
+   const esAdmin =
+    data.admin === true ||
+    data.admin === "true" ||
+    data.admin === 1 ||
+    data.admin === "1";
+
+localStorage.setItem("usuario", data.usuario || usuario);
+localStorage.setItem("password", password);
+localStorage.setItem("gps", data.gps || "");
+localStorage.setItem("admin", esAdmin ? "true" : "false");
+
+if (esAdmin) {
+    window.location.href = "/admin.html";
+} else {
+    window.location.href = "/index.html";
+}
 
 } else {
 

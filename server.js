@@ -29,6 +29,7 @@ const transporter = nodemailer.createTransport({
     pass: "yelxfrchbfjkxuur"
   }
 });
+
 function servicioVencido(fecha) {
   if (!fecha) return false;
 
@@ -39,6 +40,28 @@ function servicioVencido(fecha) {
   vence.setHours(0, 0, 0, 0);
 
   return vence < hoy;
+}
+async function traccarAuth() {
+  const user = process.env.TRACCAR_USER;
+  const pass = process.env.TRACCAR_PASS;
+
+  if (!user || !pass) {
+    throw new Error("Faltan TRACCAR_USER o TRACCAR_PASS");
+  }
+
+  return "Basic " + Buffer.from(`${user}:${pass}`).toString("base64");
+}
+
+async function obtenerDeviceTraccarPorImei(imei) {
+  const auth = await traccarAuth();
+
+  const r = await fetch("http://194.238.25.152:8082/api/devices", {
+    headers: { Authorization: auth }
+  });
+
+  const devices = await r.json();
+
+  return devices.find(d => String(d.uniqueId) === String(imei));
 }
 function guardarEvento(usuario, tipo, descripcion) {
   db.query(
@@ -403,72 +426,89 @@ app.put("/vehiculos/imei/:imei", (req, res) => {
     }
   );
 });
-app.put("/vehiculos/imei/:imei", (req, res) => {
-  const imei = req.params.imei;
 
-  const {
-    usuario,
-    password,
-    correo,
-    fecha_creacion,
-    fecha_vencimiento,
-    gps,
-    modelo_gps,
-    placa,
-    tipo
-  } = req.body;
-
-  db.query(
-    "SELECT * FROM vehiculos WHERE imei = ? LIMIT 1",
-    [imei],
-    (err, results) => {
-      if (err) {
-        console.log("Error buscando IMEI:", err);
-        return res.status(500).json({ ok:false });
-      }
-
-      if (results.length > 0) {
-        db.query(
-          `
-          UPDATE vehiculos
-          SET usuario=?, password=?, correo=?, fecha_creacion=?, fecha_vencimiento=?,
-              gps=?, modelo_gps=?, placa=?, tipo=?
-          WHERE imei=?
-          `,
-          [usuario, password, correo, fecha_creacion, fecha_vencimiento, gps, modelo_gps, placa, tipo, imei],
-          (err2) => {
-            if (err2) {
-              console.log("Error actualizando IMEI:", err2);
-              return res.status(500).json({ ok:false });
-            }
-
-            res.json({ ok:true });
-          }
-        );
-      } else {
-        db.query(
-          `
-          INSERT INTO vehiculos
-          (usuario,password,correo,fecha_creacion,fecha_vencimiento,estado_pago,gps,imei,modelo_gps,placa,admin,tipo,estado,bloqueo,motor,pasoRuta,velocidad,km,latitud,longitud)
-          VALUES (?,?,?,?,?,'activo',?,?,?,?,0,?,'activo','desbloqueado','encendido',0,0,0,0,0)
-          `,
-          [usuario, password, correo, fecha_creacion, fecha_vencimiento, gps, imei, modelo_gps, placa, tipo],
-          (err3) => {
-            if (err3) {
-              console.log("Error insertando IMEI:", err3);
-              return res.status(500).json({ ok:false });
-            }
-
-            res.json({ ok:true });
-          }
-        );
-      }
-    }
-  );
-});
 // ===============================
 // ELIMINAR VEHÍCULO SOLO ADMIN
 // ===============================
+app.delete("/vehiculos/imei/:imei", async (req, res) => {
+
+  const imei = req.params.imei;
+  const { adminUsuario, adminPassword } = req.body;
+
+  db.query(
+    "SELECT * FROM usuarios WHERE usuario = ? AND password = ? AND admin = 1",
+    [adminUsuario, adminPassword],
+    async (errAdmin, adminResult) => {
+
+      if (errAdmin) {
+        console.log("Error validando admin:", errAdmin);
+        return res.status(500).json({ ok:false });
+      }
+
+      if (adminResult.length === 0) {
+        return res.status(403).json({
+          ok:false,
+          error:"No autorizado"
+        });
+      }
+
+      try {
+
+        const auth = await traccarAuth();
+
+        const device = await obtenerDeviceTraccarPorImei(imei);
+
+        if(device && device.id){
+
+          await fetch(
+            `http://194.238.25.152:8082/api/devices/${device.id}`,
+            {
+              method:"DELETE",
+              headers:{
+                Authorization: auth
+              }
+            }
+          );
+
+          console.log("✅ Eliminado de Traccar:", imei);
+
+        }
+
+        db.query(
+          "DELETE FROM vehiculos WHERE imei = ?",
+          [imei],
+          (errDelete) => {
+
+            if(errDelete){
+              console.log(errDelete);
+              return res.status(500).json({
+                ok:false,
+                error:"Error eliminando de AndesTrack"
+              });
+            }
+
+            res.json({
+              ok:true
+            });
+
+          }
+        );
+
+      } catch(error){
+
+        console.log("Error eliminando en Traccar:", error);
+
+        res.status(500).json({
+          ok:false,
+          error:"Error eliminando en Traccar"
+        });
+
+      }
+
+    }
+  );
+
+});
 app.delete("/vehiculos/:id", (req, res) => {
 
   const { adminUsuario } = req.body;

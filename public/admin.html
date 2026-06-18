@@ -1047,7 +1047,7 @@ ${v.estado === 'bloqueado' ? 'disabled' : ''}>
 
                 <button
                 class="btn-eliminar"
-                onclick="eliminarCliente(${v.id})">
+onclick="eliminarClientePorImei('${v.imei}')"
                 🗑️ Eliminar
                 </button>
                 <button
@@ -1224,35 +1224,32 @@ document.getElementById("gps").value = "";
 // ======================================
 // ELIMINAR
 // ======================================
+async function eliminarClientePorImei(imei){
 
-async function eliminarCliente(id){
-
-    const confirmar = confirm("¿Seguro que deseas eliminar este vehículo?");
+    const confirmar = confirm("¿Seguro que deseas eliminar este vehículo de AndesTrack y Traccar?");
 
     if(!confirmar){
         return;
     }
 
-    const adminUsuario = localStorage.getItem("usuario");
-
-    const res = await fetch("/vehiculos/" + id, {
+    const res = await fetch("/vehiculos/imei/" + imei, {
         method:"DELETE",
         headers:{
             "Content-Type":"application/json"
         },
         body: JSON.stringify({
-    adminUsuario,
-    adminPassword: localStorage.getItem("password")
-})
+            adminUsuario: localStorage.getItem("usuario"),
+            adminPassword: localStorage.getItem("password")
+        })
     });
 
     const data = await res.json();
 
     if(data.ok){
-        alert("Vehículo eliminado correctamente");
+        alert("✅ Vehículo eliminado de AndesTrack y Traccar");
         cargarClientes();
     }else{
-        alert(data.error || "No autorizado");
+        alert(data.error || "❌ No se pudo eliminar");
     }
 }
 

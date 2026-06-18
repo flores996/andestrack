@@ -839,12 +839,22 @@ async function cargarVehiculosIniciales(){
 
     try{
 
-const respuesta = await fetch("/vehiculos/gps/" + gps + "?nocache=" + Date.now());
+        const usuarioActual = localStorage.getItem("usuario");
+        const esAdmin = localStorage.getItem("admin") === "true";
+
+        const respuesta = await fetch("/traccar/vehiculos?nocache=" + Date.now());
         const lista = await respuesta.json();
 
-        console.log("VEHÍCULOS TRACCAR:", lista);
+        console.log("VEHÍCULOS TRACCAR INDEX:", lista);
 
-        lista.forEach(data => {
+        const listaFiltrada = esAdmin
+            ? lista
+            : lista.filter(v =>
+                String(v.usuario).trim().toLowerCase() ===
+                String(usuarioActual).trim().toLowerCase()
+            );
+
+        listaFiltrada.forEach(data => {
             procesarVehiculo(data);
         });
 
@@ -889,14 +899,17 @@ function procesarVehiculo(data){
     const admin = localStorage.getItem("admin");
     const esAdmin = admin === "true" || admin === "1";
 
-    if(!esAdmin){
+   if(!esAdmin){
 
-        const gpsUsuario = localStorage.getItem("gps");
+    const usuarioActual = localStorage.getItem("usuario");
 
-        if(data.gps != gpsUsuario){
-            return;
-        }
+    if(
+        String(data.usuario).trim().toLowerCase() !==
+        String(usuarioActual).trim().toLowerCase()
+    ){
+        return;
     }
+}
 
     console.log("RECIBIDO:", data);
 
