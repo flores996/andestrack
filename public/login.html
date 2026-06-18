@@ -435,32 +435,21 @@ onclick="recuperarClave()"
 
                 if (data.success) {
 
+    localStorage.clear();
+
     localStorage.setItem("usuario", data.usuario);
     localStorage.setItem("password", password);
     localStorage.setItem("gps", data.gps);
-    localStorage.setItem("admin", data.admin);
+    localStorage.setItem("admin", data.admin ? "true" : "false");
 
-   const esAdmin =
-    data.admin === true ||
-    data.admin === "true" ||
-    data.admin === 1 ||
-    data.admin === "1";
-
-localStorage.setItem("usuario", data.usuario || usuario);
-localStorage.setItem("password", password);
-localStorage.setItem("gps", data.gps || "");
-localStorage.setItem("admin", esAdmin ? "true" : "false");
-
-if (esAdmin) {
-    window.location.href = "/admin.html";
-} else {
-    window.location.href = "/index.html";
-}
+    if (data.admin === true || data.admin === 1 || data.admin === "true") {
+        window.location.href = "/admin.html";
+    } else {
+        window.location.href = "/index.html";
+    }
 
 } else {
-
     alert(data.error || "Usuario o contraseña incorrectos");
-
 }
 
     
