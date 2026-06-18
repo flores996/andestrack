@@ -1586,17 +1586,19 @@ async function editarCliente(imei){
         headers:{
             "Content-Type":"application/json"
         },
-        body: JSON.stringify({
-            usuario,
-            password,
-            correo,
-            fecha_creacion,
-            fecha_vencimiento,
-            gps,
-            modelo_gps,
-            placa,
-            tipo
-        })
+       body: JSON.stringify({
+    usuario,
+    password,
+    correo,
+    fecha_creacion,
+    fecha_vencimiento,
+    gps,
+    modelo_gps,
+    placa,
+    tipo,
+    adminUsuario: localStorage.getItem("usuario"),
+    adminPassword: localStorage.getItem("password")
+})
     });
 
     const data = await respuesta.json();
