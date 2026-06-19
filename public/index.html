@@ -721,16 +721,17 @@ button:hover{
       Mi perfil
     </button>
 <script>
-const adminActual =
-localStorage.getItem("usuario");
+const esAdmin = localStorage.getItem("admin") === "true";
 
-if(adminActual !== "true"){
+if(!esAdmin){
 
 document.write(`
 
 `);
 
 }
+
+
 </script>
 
     <button onclick="cerrarSesion()">
@@ -807,6 +808,11 @@ const usuario = localStorage.getItem("usuario");
 
 if(!usuario){
    window.location.href="/login.html";
+}
+const esAdminPagina = localStorage.getItem("admin") === "true";
+
+if(esAdminPagina){
+   window.location.href = "/admin.html";
 }
 document.getElementById("nombreUsuario").innerText = usuario;
 
