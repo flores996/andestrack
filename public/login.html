@@ -441,7 +441,8 @@ onclick="recuperarClave()"
     localStorage.setItem("password", password);
     localStorage.setItem("gps", data.gps);
     localStorage.setItem("admin", data.admin ? "true" : "false");
-
+console.log(data);
+alert(JSON.stringify(data));
     if (data.admin === true || data.admin === 1 || data.admin === "true") {
         window.location.href = "/admin.html";
     } else {
