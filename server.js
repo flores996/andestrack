@@ -201,7 +201,7 @@ modelo_gps,
   } = req.body;
 
   db.query(
-    "SELECT * FROM usuarios WHERE usuario = ? AND password = ? AND admin = 1",
+    "SELECT * FROM vehiculos WHERE usuario = ? AND password = ? AND admin = 1",
     [adminUsuario, adminPassword],
     (errAdmin, adminResult) => {
       if (errAdmin) {
@@ -436,7 +436,7 @@ app.delete("/vehiculos/imei/:imei", async (req, res) => {
   const { adminUsuario, adminPassword } = req.body;
 
   db.query(
-    "SELECT * FROM usuarios WHERE usuario = ? AND password = ? AND admin = 1",
+    "SELECT * FROM vehiculos WHERE usuario = ? AND password = ? AND admin = 1",
     [adminUsuario, adminPassword],
     async (errAdmin, adminResult) => {
 
@@ -514,7 +514,7 @@ app.delete("/vehiculos/:id", (req, res) => {
   const { adminUsuario } = req.body;
 
   db.query(
-    "SELECT * FROM usuarios WHERE usuario = ? AND admin = 1",
+    "SELECT * FROM vehiculos WHERE usuario = ? AND admin = 1",
     [adminUsuario],
     (errAdmin, adminResult) => {
 
@@ -890,89 +890,50 @@ app.post("/login", (req, res) => {
   db.query(
     `
     SELECT *
-    FROM usuarios
+    FROM vehiculos
     WHERE usuario = ?
     AND password = ?
+    LIMIT 1
     `,
     [usuario, password],
-    (err, adminResults) => {
-
+    (err, results) => {
       if (err) {
-        console.log("Error login admin:", err);
+        console.log("Error login:", err);
         return res.status(500).json({
-          success: false
+          success: false,
+          error: "Error en servidor"
         });
       }
 
-      // ADMIN
-      if (adminResults.length > 0) {
-
+      if (results.length === 0) {
         return res.json({
-          success: true,
-          usuario: adminResults[0].usuario,
-          gps: "1",
-          admin: true
+          success: false,
+          error: "Usuario o contraseña incorrectos"
         });
-
       }
 
-      // CLIENTE
-      db.query(
-        `
-        SELECT *
-        FROM vehiculos
-        WHERE usuario = ?
-        AND password = ?
-        `,
-        [usuario, password],
-        (err2, results) => {
+      const user = results[0];
 
-          if (err2) {
-            console.log("Error login vehículo:", err2);
+      if (user.estado_pago === "suspendido") {
+        return res.json({
+          success: false,
+          error: "Servicio suspendido. Comuníquese con el administrador."
+        });
+      }
 
-            return res.status(500).json({
-              success: false
-            });
-          }
+      if (user.admin != 1 && servicioVencido(user.fecha_vencimiento)) {
+        return res.json({
+          success: false,
+          error: "Servicio vencido. Comuníquese con el administrador."
+        });
+      }
 
-          if (results.length === 0) {
-
-            return res.json({
-              success: false
-            });
-
-          }
-
-          const user = results[0];
-          if (user.estado_pago === "suspendido") {
-  return res.json({
-    success: false,
-    error: "Servicio suspendido. Comuníquese con el administrador."
-  });
-}
-
-          // VALIDAR SOLO ESTE USUARIO
-          if (servicioVencido(user.fecha_vencimiento)) {
-
-            return res.json({
-              success: false,
-              error:
-                "Servicio vencido. Comuníquese con el administrador."
-            });
-
-          }
-
-          return res.json({
-            success: true,
-            usuario: user.usuario,
-            gps: user.gps,
-            admin:
-              user.admin == 1 ||
-              user.admin === true
-          });
-
-        }
-      );
+      return res.json({
+        success: true,
+        usuario: user.usuario,
+        gps: user.gps,
+        admin: user.admin == 1
+      });
     }
   );
 });
@@ -987,7 +948,7 @@ app.post("/recuperar-password", (req, res) => {
   }
 
   db.query(
-    "SELECT usuario, password, correo FROM usuarios WHERE usuario = ? OR correo = ? LIMIT 1",
+    "SELECT usuario, password, correo FROM vehiculos WHERE usuario = ? OR correo = ? LIMIT 1",
     [dato, dato],
     (errAdmin, adminResults) => {
       if (errAdmin) {
