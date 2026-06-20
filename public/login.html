@@ -35,34 +35,33 @@
             font-family:'Segoe UI', sans-serif;
         }
 
-        body{
+       body{
+    width:100%;
+    height:100vh;
+    overflow:hidden;
 
-            width:100%;
+    background:
+    radial-gradient(
+        circle at top,
+        rgba(0,255,213,0.12),
+        transparent 35%
+    ),
+    radial-gradient(
+        circle at bottom,
+        rgba(0,120,255,0.08),
+        transparent 40%
+    ),
+    linear-gradient(
+        180deg,
+        #030b1f,
+        #081120,
+        #0f172a
+    );
+}
 
-            height:100vh;
-
-            overflow:hidden;
-
-            background:linear-gradient(
-                135deg,
-                #0f172a,
-                #111827
-            );
-
-        }
-
-        #map{
-
-            width:100%;
-
-            height:100vh;
-
-            filter:
-                saturate(1.03)
-                contrast(1.01)
-                brightness(0.96);
-
-        }
+       #map{
+    display:none;
+}
 
         .login-box{
 
@@ -88,9 +87,11 @@
 
             border:1px solid rgba(255,255,255,0.08);
 
-            box-shadow:
-                0 0 40px rgba(0,255,213,0.12),
-                0 0 80px rgba(0,0,0,0.35);
+             box-shadow:
+        0 0 80px rgba(0,255,213,0.18),
+        0 0 150px rgba(0,120,255,0.10),
+        0 0 250px rgba(0,255,213,0.06);
+
 
         }
 
@@ -356,33 +357,6 @@ onclick="recuperarClave()"
     </div>
 
     <script>
-
-       const map = L.map("map").setView([-2.17, -79.90], 10);
-
-L.tileLayer(
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-        attribution: "OpenStreetMap"
-    }
-).addTo(map);
-
-for(let i = 0; i < 300; i++){
-    const lat = -2.17 + ((Math.random() - 0.5) * 1.2);
-    const lng = -79.90 + ((Math.random() - 0.5) * 1.2);
-
-    const colores = ["#ff3b5c", "#00ffd5", "#38bdf8"];
-    const color = colores[Math.floor(Math.random() * colores.length)];
-
-    L.circleMarker(
-        [lat, lng],
-        {
-            radius:4,
-            color:color,
-            fillColor:color,
-            fillOpacity:0.9
-        }
-    ).addTo(map);
-}
 
 async function login() {
 
