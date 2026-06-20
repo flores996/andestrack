@@ -888,53 +888,65 @@ app.post("/login", (req, res) => {
   const { usuario, password } = req.body;
 
   db.query(
-    `
-    SELECT *
-    FROM vehiculos
-    WHERE usuario = ?
-    AND password = ?
-    LIMIT 1
-    `,
+    "SELECT * FROM usuarios WHERE usuario = ? AND password = ? AND admin = 1 LIMIT 1",
     [usuario, password],
-    (err, results) => {
+    (err, adminResults) => {
       if (err) {
-        console.log("Error login:", err);
-        return res.status(500).json({
-          success: false,
-          error: "Error en servidor"
-        });
+        console.log("Error login admin:", err);
+        return res.status(500).json({ success: false });
       }
 
-      if (results.length === 0) {
+      if (adminResults.length > 0) {
         return res.json({
-          success: false,
-          error: "Usuario o contraseña incorrectos"
+          success: true,
+          usuario: adminResults[0].usuario,
+          gps: adminResults[0].gps || 1,
+          admin: true,
+          tipo: "admin"
         });
       }
 
-      const user = results[0];
+      db.query(
+        "SELECT * FROM vehiculos WHERE usuario = ? AND password = ? LIMIT 1",
+        [usuario, password],
+        (err2, results) => {
+          if (err2) {
+            console.log("Error login cliente:", err2);
+            return res.status(500).json({ success: false });
+          }
 
-      if (user.estado_pago === "suspendido") {
-        return res.json({
-          success: false,
-          error: "Servicio suspendido. Comuníquese con el administrador."
-        });
-      }
+          if (results.length === 0) {
+            return res.json({
+              success: false,
+              error: "Usuario o contraseña incorrectos"
+            });
+          }
 
-      if (user.admin != 1 && servicioVencido(user.fecha_vencimiento)) {
-        return res.json({
-          success: false,
-          error: "Servicio vencido. Comuníquese con el administrador."
-        });
-      }
+          const user = results[0];
 
-      return res.json({
-  success: true,
-  usuario: user.usuario,
-  gps: user.gps,
-  admin: false,
-  tipo: "cliente"
-});
+          if (user.estado_pago === "suspendido") {
+            return res.json({
+              success: false,
+              error: "Servicio suspendido. Comuníquese con el administrador."
+            });
+          }
+
+          if (servicioVencido(user.fecha_vencimiento)) {
+            return res.json({
+              success: false,
+              error: "Servicio vencido. Comuníquese con el administrador."
+            });
+          }
+
+          return res.json({
+            success: true,
+            usuario: user.usuario,
+            gps: user.gps,
+            admin: false,
+            tipo: "cliente"
+          });
+        }
+      );
     }
   );
 });
@@ -949,7 +961,7 @@ app.post("/recuperar-password", (req, res) => {
   }
 
   db.query(
-    "SELECT usuario, password, correo FROM vehiculos WHERE usuario = ? OR correo = ? LIMIT 1",
+    "SELECT usuario, password, correo FROM usuarios WHERE usuario = ? OR correo = ? AND admin = 1 LIMIT 1",
     [dato, dato],
     (errAdmin, adminResults) => {
       if (errAdmin) {
