@@ -880,10 +880,37 @@ app.get("/alertas/:usuario", (req, res) => {
     }
   );
 });
+app.post("/validar-cliente", (req, res) => {
+  const { usuario } = req.body;
 
+  db.query(
+    "SELECT usuario, fecha_vencimiento, estado_pago FROM vehiculos WHERE usuario = ? LIMIT 1",
+    [usuario],
+    (err, results) => {
+      if (err || results.length === 0) {
+        return res.json({ ok: false });
+      }
+
+      const user = results[0];
+
+      if (
+        user.estado_pago === "suspendido" ||
+        servicioVencido(user.fecha_vencimiento)
+      ) {
+        return res.json({
+          ok: false,
+          error: "⛔ Servicio vencido. Comunícate con el administrador 👨‍💼"
+        });
+      }
+
+      res.json({ ok: true });
+    }
+  );
+});
 // ===============================
 // LOGIN
 // ===============================
+
 app.post("/login", (req, res) => {
   const { usuario, password } = req.body;
 

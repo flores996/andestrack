@@ -809,6 +809,34 @@ const usuario = localStorage.getItem("usuario");
 if(!usuario){
    window.location.href="/login.html";
 }
+async function validarAccesoCliente(){
+    const esAdmin = localStorage.getItem("admin") === "true";
+    const usuarioActual = localStorage.getItem("usuario");
+
+    if(esAdmin){
+        return;
+    }
+
+    const respuesta = await fetch("/validar-cliente", {
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            usuario: usuarioActual
+        })
+    });
+
+    const data = await respuesta.json();
+
+    if(!data.ok){
+        alert(data.error || "Servicio vencido. Comunícate con el administrador.");
+        localStorage.clear();
+        window.location.href = "/login.html";
+    }
+}
+
+validarAccesoCliente();
 const esAdminPagina = localStorage.getItem("admin") === "true";
 
 if(esAdminPagina){
