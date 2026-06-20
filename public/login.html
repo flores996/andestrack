@@ -433,17 +433,17 @@ onclick="recuperarClave()"
 
                 const data = await respuesta.json();
 
-                if (data.success) {
+               if (data.success) {
 
     localStorage.clear();
 
     localStorage.setItem("usuario", data.usuario);
     localStorage.setItem("password", password);
     localStorage.setItem("gps", data.gps);
-    localStorage.setItem("admin", data.admin ? "true" : "false");
-console.log(data);
-alert(JSON.stringify(data));
-    if (data.admin === true || data.admin === 1 || data.admin === "true") {
+    localStorage.setItem("admin", String(data.admin));
+    localStorage.setItem("tipo", data.tipo);
+
+    if (data.tipo === "admin") {
         window.location.href = "/admin.html";
     } else {
         window.location.href = "/index.html";

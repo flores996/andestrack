@@ -929,11 +929,12 @@ app.post("/login", (req, res) => {
       }
 
       return res.json({
-        success: true,
-        usuario: user.usuario,
-        gps: user.gps,
-        admin: user.admin == 1
-      });
+  success: true,
+  usuario: user.usuario,
+  gps: user.gps,
+  admin: false,
+  tipo: "cliente"
+});
     }
   );
 });
