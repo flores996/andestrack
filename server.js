@@ -975,6 +975,7 @@ if (
 ) {
     return res.json({
         success: false,
+        bloqueado: true,
         error: "⛔ Servicio vencido. Comunícate con el administrador 👨‍💼"
     });
 }

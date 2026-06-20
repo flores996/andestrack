@@ -389,7 +389,12 @@ async function login() {
             alert(data.error || "Usuario o contraseña incorrectos");
             return;
         }
-
+if(data.bloqueado === true){
+    alert(data.error || "⛔ Servicio vencido. Comunícate con el administrador 👨‍💼");
+    localStorage.clear();
+    window.location.href = "/login.html?v=" + Date.now();
+    return;
+}
         localStorage.clear();
 
        const esAdmin =
