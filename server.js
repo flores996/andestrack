@@ -120,8 +120,20 @@ app.get("/traccar/vehiculos", async (req, res) => {
         return res.json([]);
       }
 
-      const resultado = listaDevices.map(device => {
-        const pos = listaPositions.find(p => p.deviceId === device.id);
+const resultado = listaDevices
+.filter(device => {
+  const extra = vehiculosDB.find(v => String(v.imei) === String(device.uniqueId));
+
+  if(!extra) return true;
+
+  if(extra.estado_pago === "suspendido") return false;
+
+  if(servicioVencido(extra.fecha_vencimiento)) return false;
+
+  return true;
+})
+.map(device => {
+          const pos = listaPositions.find(p => p.deviceId === device.id);
         const extra = vehiculosDB.find(v => String(v.imei) === String(device.uniqueId));
 
         return {
