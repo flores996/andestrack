@@ -922,15 +922,31 @@ app.post("/login", (req, res) => {
             });
           }
 
-          const user = results[0];
+         const user = results[0];
 
-          return res.json({
-            success: true,
-            usuario: user.usuario,
-            gps: user.gps,
-            admin: false,
-            tipo: "cliente"
-          });
+const hoy = new Date();
+hoy.setHours(0, 0, 0, 0);
+
+const vence = new Date(user.fecha_vencimiento);
+vence.setHours(0, 0, 0, 0);
+
+if (
+    user.estado_pago === "suspendido" ||
+    vence < hoy
+) {
+    return res.json({
+        success: false,
+        error: "⛔ Servicio vencido. Comunícate con el administrador 👨‍💼"
+    });
+}
+
+return res.json({
+    success: true,
+    usuario: user.usuario,
+    gps: user.gps,
+    admin: false,
+    tipo: "cliente"
+});
         }
       );
     }
