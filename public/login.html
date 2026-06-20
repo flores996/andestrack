@@ -357,116 +357,95 @@ onclick="recuperarClave()"
 
     <script>
 
-        const map = L.map("map").setView([-2.17, -79.90], 10);
+       const map = L.map("map").setView([-2.17, -79.90], 10);
 
-        L.tileLayer(
-            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            {
-                attribution: "OpenStreetMap"
-            }
-        ).addTo(map);
-
-        for(let i = 0; i < 300; i++){
-
-            const lat = -2.17 + ((Math.random() - 0.5) * 1.2);
-
-            const lng = -79.90 + ((Math.random() - 0.5) * 1.2);
-
-            const colores = [
-                "#ff3b5c",
-                "#00ffd5",
-                "#38bdf8"
-            ];
-
-            const color = colores[
-                Math.floor(Math.random() * colores.length)
-            ];
-
-            L.circleMarker(
-                [lat, lng],
-                {
-                    radius:4,
-                    color:color,
-                    fillColor:color,
-                    fillOpacity:0.9
-                }
-            ).addTo(map);
-
-        }
-
-        async function login() {
-
-            const usuario = document
-                .getElementById("usuario")
-                .value
-                .trim();
-
-            const password = document
-                .getElementById("password")
-                .value
-                .trim();
-
-            if(!usuario || !password){
-
-                alert("Completa todos los campos");
-
-                return;
-
-            }
-
-            try {
-
-                const respuesta = await fetch("/login", {
-
-                    method:"POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body:JSON.stringify({
-                        usuario: usuario,
-                        password: password
-                    })
-
-                });
-
-                const data = await respuesta.json();
-
-               if (data.success) {
-
-    localStorage.clear();
-
-    localStorage.setItem("usuario", data.usuario);
-    localStorage.setItem("password", password);
-    localStorage.setItem("gps", data.gps);
-    localStorage.setItem("admin", String(data.admin));
-    localStorage.setItem("tipo", data.tipo);
-
-    if (data.tipo === "admin") {
-        window.location.href = "/admin.html";
-    } else {
-        window.location.href = "/index.html";
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        attribution: "OpenStreetMap"
     }
+).addTo(map);
 
-} else {
-    alert(data.error || "Usuario o contraseña incorrectos");
+for(let i = 0; i < 300; i++){
+    const lat = -2.17 + ((Math.random() - 0.5) * 1.2);
+    const lng = -79.90 + ((Math.random() - 0.5) * 1.2);
+
+    const colores = ["#ff3b5c", "#00ffd5", "#38bdf8"];
+    const color = colores[Math.floor(Math.random() * colores.length)];
+
+    L.circleMarker(
+        [lat, lng],
+        {
+            radius:4,
+            color:color,
+            fillColor:color,
+            fillOpacity:0.9
+        }
+    ).addTo(map);
 }
 
-    
+async function login() {
 
-            } catch (error) {
+    const usuario = document.getElementById("usuario").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-                console.log(error);
-
-                alert("Error conectando con servidor");
-            }
+    if(!usuario || !password){
+        alert("Completa todos los campos");
+        return;
     }
+
+    try {
+
+        const respuesta = await fetch("/login", {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                usuario,
+                password
+            })
+        });
+
+        const data = await respuesta.json();
+
+        console.log("LOGIN RESPUESTA:", data);
+
+        if(!data.success){
+            alert(data.error || "Usuario o contraseña incorrectos");
+            return;
+        }
+
+        localStorage.clear();
+
+        localStorage.setItem("usuario", data.usuario);
+        localStorage.setItem("password", password);
+        localStorage.setItem("gps", data.gps);
+        localStorage.setItem("admin", String(data.admin));
+        localStorage.setItem("tipo", data.tipo || "");
+
+        const esAdmin =
+            data.admin === true ||
+            data.admin === "true" ||
+            data.admin === 1 ||
+            data.admin === "1" ||
+            data.tipo === "admin";
+
+        if(esAdmin){
+            window.location.href = "/admin.html?v=" + Date.now();
+        }else{
+            window.location.href = "/index.html?v=" + Date.now();
+        }
+
+    } catch (error) {
+        console.log(error);
+        alert("Error conectando con servidor");
+    }
+}
+
 async function recuperarClave(){
 
-    const dato = prompt(
-        "📩 Ingrese su correo o usuario"
-    );
+    const dato = prompt("📩 Ingrese su correo o usuario");
 
     if(!dato){
         return;
@@ -493,10 +472,8 @@ async function recuperarClave(){
         }
 
     }catch(error){
-
         console.log(error);
         alert("Error conectando con el servidor");
-
     }
 }
         
