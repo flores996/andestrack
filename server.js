@@ -124,7 +124,7 @@ const resultado = listaDevices
 .filter(device => {
   const extra = vehiculosDB.find(v => String(v.imei) === String(device.uniqueId));
 
-  if(!extra) return true;
+  if(!extra) return false;
 
   if(extra.estado_pago === "suspendido") return false;
 

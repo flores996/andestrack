@@ -838,7 +838,14 @@ async function validarClienteActivo(){
     }
 }
 
-validarClienteActivo();
+validarClienteActivo().then(() => {
+    cargarVehiculosIniciales();
+
+    setInterval(() => {
+        validarClienteActivo();
+        cargarVehiculosIniciales();
+    }, 1000);
+});
 const esAdminPagina = localStorage.getItem("admin") === "true";
 
 if(esAdminPagina){
@@ -1882,11 +1889,6 @@ async function crearGeocerca(usuario, latitud, longitud){
     }
 }
 
-cargarVehiculosIniciales();
-
-setInterval(() => {
-    cargarVehiculosIniciales();
-}, 1000);
 socket.on("recibir-ubicacion", (data) => {
     procesarVehiculo(data);
 });
