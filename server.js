@@ -900,7 +900,7 @@ app.post("/login", (req, res) => {
         return res.json({
           success: true,
           usuario: adminResults[0].usuario,
-          gps: adminResults[0].gps || 1,
+          gps: "1",
           admin: true,
           tipo: "admin"
         });
@@ -923,20 +923,6 @@ app.post("/login", (req, res) => {
           }
 
           const user = results[0];
-
-          if (user.estado_pago === "suspendido") {
-            return res.json({
-              success: false,
-              error: "Servicio suspendido. Comuníquese con el administrador."
-            });
-          }
-
-          if (servicioVencido(user.fecha_vencimiento)) {
-            return res.json({
-              success: false,
-              error: "Servicio vencido. Comuníquese con el administrador."
-            });
-          }
 
           return res.json({
             success: true,
