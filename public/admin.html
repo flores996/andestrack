@@ -645,14 +645,14 @@ body{
 
 <body>
 <script>
+const usuarioAdmin = localStorage.getItem("usuario");
+const passwordAdmin = localStorage.getItem("password");
 const esAdmin = localStorage.getItem("admin");
 
-if (
-    esAdmin !== "true" &&
-    esAdmin !== "1"
-) {
+if (!usuarioAdmin || !passwordAdmin || esAdmin !== "true") {
+    localStorage.clear();
     alert("Acceso denegado. Inicia sesión como administrador.");
-    window.location.href = "/login.html";
+    window.location.replace("/login.html");
 }
 </script>
 
