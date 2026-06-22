@@ -781,23 +781,24 @@ db.query(
         }
 
         io.emit("recibir-ubicacion", {
-          id: v.id,
-          usuario: v.usuario,
-          admin: v.admin || false,
-          placa: v.placa,
-          tipo: v.tipo,
-          gps: v.gps,
-fecha_creacion: v.fecha_creacion,
-fecha_vencimiento: v.fecha_vencimiento,
-estado_pago: v.estado_pago,
-km,
-latitud: nuevaLatitud,
-          longitud: nuevaLongitud,
-          velocidad,
-          estado,
-          bloqueo: v.bloqueo,
-          motor: v.motor,
-        });
+  id: v.id,
+  imei: v.imei,
+  usuario: v.usuario,
+  admin: v.admin || false,
+  placa: v.placa,
+  tipo: v.tipo,
+  gps: v.gps,
+  fecha_creacion: v.fecha_creacion,
+  fecha_vencimiento: v.fecha_vencimiento,
+  estado_pago: v.estado_pago,
+  km,
+  latitud: nuevaLatitud,
+  longitud: nuevaLongitud,
+  velocidad,
+  estado,
+  bloqueo: v.bloqueo,
+  motor: v.motor,
+});
       }
     });
 
