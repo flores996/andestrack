@@ -892,8 +892,7 @@ async function cargarVehiculosIniciales(){
         if(esAdmin){
             url = "/traccar/vehiculos?nocache=" + Date.now();
         }else{
-            url = "/traccar/vehiculos/gps/" + gpsActual + "?nocache=" + Date.now();
-        }
+url = "/vehiculos/gps/" + gpsActual + "?nocache=" + Date.now();        }
 
         const respuesta = await fetch(url);
         const lista = await respuesta.json();
@@ -964,8 +963,8 @@ function procesarVehiculo(data){
 
     console.log("RECIBIDO:", data);
 
-const id = "veh-" + data.id;
-const imeiReal = data.imei || "";
+const id = "vehiculo-" + data.id;
+const imeiReal = data.imei || data.id;
 if(!id){
     console.log("Vehículo sin IMEI/ID:", data);
     return;
