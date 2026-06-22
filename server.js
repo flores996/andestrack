@@ -172,7 +172,7 @@ const resultado = listaDevices
 });
 app.get("/traccar/vehiculos/gps/:gps", async (req, res) => {
   try {
-    const gps = String(req.params.gps).trim();
+    const gps = req.params.gps;
 
     const auth = await traccarAuth();
 
@@ -192,56 +192,53 @@ app.get("/traccar/vehiculos/gps/:gps", async (req, res) => {
       [gps],
       (err, vehiculosDB) => {
         if (err) {
-          console.log("Error multiempresa:", err);
+          console.log("Error leyendo vehículos por GPS:", err);
           return res.json([]);
         }
 
-        const resultado = vehiculosDB
-          .filter(v =>
-            v.estado_pago !== "suspendido" &&
-            !servicioVencido(v.fecha_vencimiento)
-          )
-          .map(v => {
-            const device = listaDevices.find(d =>
-              String(d.uniqueId) === String(v.imei)
+        const resultado = listaDevices
+          .map(device => {
+            const extra = vehiculosDB.find(v =>
+              String(v.imei) === String(device.uniqueId)
             );
 
-            const pos = device
-              ? listaPositions.find(p => p.deviceId === device.id)
-              : null;
+            if (!extra) return null;
+            if (extra.estado_pago === "suspendido") return null;
+            if (servicioVencido(extra.fecha_vencimiento)) return null;
+
+            const pos = listaPositions.find(p => p.deviceId === device.id);
 
             return {
-              id: v.id,
-              imei: v.imei,
-              usuario: v.usuario,
-              password: v.password,
-              correo: v.correo,
-              placa: v.placa,
-              tipo: v.tipo || "auto",
-              gps: v.gps,
-              modelo_gps: v.modelo_gps,
-
-              latitud: pos ? pos.latitude : v.latitud,
-              longitud: pos ? pos.longitude : v.longitud,
-              velocidad: pos ? Math.round(pos.speed * 1.852) : v.velocidad,
-              estado: device && device.status === "online" ? "activo" : v.estado,
-              km: pos ? ((pos.attributes.totalDistance || 0) / 1000).toFixed(2) : v.km,
-
-              motor: v.motor,
-              bloqueo: v.bloqueo,
-              fecha_creacion: v.fecha_creacion,
-              fecha_vencimiento: v.fecha_vencimiento,
-              estado_pago: v.estado_pago
+              id: extra.id,
+              usuario: extra.usuario,
+              password: extra.password,
+              correo: extra.correo,
+              placa: extra.placa,
+              tipo: extra.tipo || "auto",
+              gps: extra.gps,
+              imei: extra.imei,
+              modelo_gps: extra.modelo_gps || "No registrado",
+              latitud: pos ? pos.latitude : 0,
+              longitud: pos ? pos.longitude : 0,
+              velocidad: pos ? Math.round(pos.speed * 1.852) : 0,
+              estado: device.status === "online" ? "activo" : "apagado",
+              km: pos ? ((pos.attributes.totalDistance || 0) / 1000).toFixed(2) : 0,
+              motor: extra.motor || "encendido",
+              bloqueo: extra.bloqueo || "desbloqueado",
+              fecha_creacion: extra.fecha_creacion,
+              fecha_vencimiento: extra.fecha_vencimiento,
+              estado_pago: extra.estado_pago
             };
-          });
+          })
+          .filter(Boolean);
 
         res.json(resultado);
       }
     );
 
   } catch (error) {
-    console.log("ERROR /traccar/vehiculos/gps:", error);
-    res.json([]);
+    console.log("ERROR TRACCAR GPS:", error);
+    res.status(500).json([]);
   }
 });
 // ===============================

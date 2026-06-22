@@ -890,9 +890,8 @@ async function cargarVehiculosIniciales(){
        const gpsActual = localStorage.getItem("gps");
 
 const respuesta = await fetch(
-    "/traccar/vehiculos/gps/" + gpsActual + "?nocache=" + Date.now()
+  "/traccar/vehiculos?nocache=" + Date.now()
 );
-
 const lista = await respuesta.json();
 
 console.log("VEHÍCULOS MULTIEMPRESA GPS:", gpsActual, lista);
