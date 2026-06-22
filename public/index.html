@@ -964,8 +964,8 @@ function procesarVehiculo(data){
 
     console.log("RECIBIDO:", data);
 
-const id = data.imei || data.id;
-
+const id = "veh-" + data.id;
+const imeiReal = data.imei || "";
 if(!id){
     console.log("Vehículo sin IMEI/ID:", data);
     return;
@@ -1109,11 +1109,7 @@ margin-bottom:8px;
 ">
 
 <h3 id="nombre-${id}">
-${
-localStorage.getItem(
-    "vehiculo-" + id
-) || id
-}
+${data.usuario || data.placa || id}
 </h3>
 
 ${id === "true" ? "" : `
@@ -1153,7 +1149,7 @@ ${data.longitud}
     <div class="controles-motor">
 
 <button
-onclick="encenderMotor('${id}')"
+onclick="encenderMotor('${imeiReal}')"
 class="btn-on"
 ${data.estado === 'bloqueado' ? 'disabled' : ''}
 style="${data.estado === 'bloqueado'
@@ -1164,19 +1160,19 @@ ON
 </button>
 
 <button
-onclick="apagarMotor('${id}')"
+onclick="apagarMotor('${imeiReal}')"
 class="btn-off">
 🔴 OFF
 </button>
 
 <button
-onclick="bloquearVehiculo('${id}')"
+onclick="bloquearVehiculo('${imeiReal}')"
 class="btn-lock">
 🔒 Bloq
 </button>
 
 <button
-onclick="desbloquearVehiculo('${id}')"
+onclick="desbloquearVehiculo('${imeiReal}')"
 class="btn-unlock">
 🔓 Free
 </button>
