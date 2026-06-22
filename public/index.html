@@ -884,24 +884,38 @@ async function cargarVehiculosIniciales(){
 
     try{
 
-        const usuarioActual = localStorage.getItem("usuario");
+        const gpsActual = localStorage.getItem("gps");
         const esAdmin = localStorage.getItem("admin") === "true";
 
-       const gpsActual = localStorage.getItem("gps");
+        let url = "";
 
-const respuesta = await fetch(
-  "/traccar/vehiculos?nocache=" + Date.now()
-);
-const lista = await respuesta.json();
+        if(esAdmin){
+            url = "/traccar/vehiculos?nocache=" + Date.now();
+        }else{
+            url = "/traccar/vehiculos/gps/" + gpsActual + "?nocache=" + Date.now();
+        }
 
-console.log("VEHÍCULOS MULTIEMPRESA GPS:", gpsActual, lista);
+        const respuesta = await fetch(url);
+        const lista = await respuesta.json();
 
-lista.forEach(data => {
-    procesarVehiculo(data);
-});
+        console.log("URL USADA:", url);
+        console.log("VEHÍCULOS CLIENTE:", lista);
+
+        listaVehiculos.innerHTML = "";
+
+        Object.keys(vehiculos).forEach(id => {
+            if(vehiculos[id].marker){
+                mapa.removeLayer(vehiculos[id].marker);
+            }
+            delete vehiculos[id];
+        });
+
+        lista.forEach(data => {
+            procesarVehiculo(data);
+        });
 
     }catch(error){
-        console.log("ERROR TRACCAR:", error);
+        console.log("ERROR TRACCAR GPS:", error);
     }
 
 }
@@ -938,20 +952,15 @@ function actualizarContadores() {
 
 function procesarVehiculo(data){
 
-    const admin = localStorage.getItem("admin");
-    const esAdmin = admin === "true" || admin === "1";
+    const esAdmin = localStorage.getItem("admin") === "true";
 
-   if(!esAdmin){
+    if(!esAdmin){
+        const gpsActual = localStorage.getItem("gps");
 
-    const gpsActual = localStorage.getItem("gps");
-
-    if(
-        String(data.gps).trim() !==
-        String(gpsActual).trim()
-    ){
-        return;
+        if(String(data.gps).trim() !== String(gpsActual).trim()){
+            return;
+        }
     }
-}
 
     console.log("RECIBIDO:", data);
 
