@@ -170,6 +170,80 @@ const resultado = listaDevices
     res.status(500).json([]);
   }
 });
+app.get("/traccar/vehiculos/gps/:gps", async (req, res) => {
+  try {
+    const gps = String(req.params.gps).trim();
+
+    const auth = await traccarAuth();
+
+    const devicesRes = await fetch("http://194.238.25.152:8082/api/devices", {
+      headers: { Authorization: auth }
+    });
+
+    const positionsRes = await fetch("http://194.238.25.152:8082/api/positions", {
+      headers: { Authorization: auth }
+    });
+
+    const listaDevices = await devicesRes.json();
+    const listaPositions = await positionsRes.json();
+
+    db.query(
+      "SELECT * FROM vehiculos WHERE gps = ?",
+      [gps],
+      (err, vehiculosDB) => {
+        if (err) {
+          console.log("Error multiempresa:", err);
+          return res.json([]);
+        }
+
+        const resultado = vehiculosDB
+          .filter(v =>
+            v.estado_pago !== "suspendido" &&
+            !servicioVencido(v.fecha_vencimiento)
+          )
+          .map(v => {
+            const device = listaDevices.find(d =>
+              String(d.uniqueId) === String(v.imei)
+            );
+
+            const pos = device
+              ? listaPositions.find(p => p.deviceId === device.id)
+              : null;
+
+            return {
+              id: v.id,
+              imei: v.imei,
+              usuario: v.usuario,
+              password: v.password,
+              correo: v.correo,
+              placa: v.placa,
+              tipo: v.tipo || "auto",
+              gps: v.gps,
+              modelo_gps: v.modelo_gps,
+
+              latitud: pos ? pos.latitude : v.latitud,
+              longitud: pos ? pos.longitude : v.longitud,
+              velocidad: pos ? Math.round(pos.speed * 1.852) : v.velocidad,
+              estado: device && device.status === "online" ? "activo" : v.estado,
+              km: pos ? ((pos.attributes.totalDistance || 0) / 1000).toFixed(2) : v.km,
+
+              motor: v.motor,
+              bloqueo: v.bloqueo,
+              fecha_creacion: v.fecha_creacion,
+              fecha_vencimiento: v.fecha_vencimiento,
+              estado_pago: v.estado_pago
+            };
+          });
+
+        res.json(resultado);
+      }
+    );
+
+  } catch (error) {
+    console.log("ERROR /traccar/vehiculos/gps:", error);
+    res.json([]);
+  }
+});
 // ===============================
 // VEHÍCULOS POR GPS / CLIENTE
 // ===============================

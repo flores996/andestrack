@@ -887,22 +887,19 @@ async function cargarVehiculosIniciales(){
         const usuarioActual = localStorage.getItem("usuario");
         const esAdmin = localStorage.getItem("admin") === "true";
 
-        const respuesta = await fetch("/traccar/vehiculos?nocache=" + Date.now());
-        const lista = await respuesta.json();
+       const gpsActual = localStorage.getItem("gps");
 
-        console.log("VEHÍCULOS TRACCAR INDEX:", lista);
+const respuesta = await fetch(
+    "/traccar/vehiculos/gps/" + gpsActual + "?nocache=" + Date.now()
+);
 
-        const gpsActual = localStorage.getItem("gps");
+const lista = await respuesta.json();
 
-const listaFiltrada = esAdmin
-    ? lista
-    : lista.filter(v =>
-        String(v.gps).trim() === String(gpsActual).trim()
-    );
+console.log("VEHÍCULOS MULTIEMPRESA GPS:", gpsActual, lista);
 
-        listaFiltrada.forEach(data => {
-            procesarVehiculo(data);
-        });
+lista.forEach(data => {
+    procesarVehiculo(data);
+});
 
     }catch(error){
         console.log("ERROR TRACCAR:", error);
