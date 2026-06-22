@@ -235,9 +235,9 @@ modelo_gps,
         });
       }
 
-      db.query(
-        "SELECT * FROM vehiculos WHERE usuario = ?",
-        [usuario],
+     db.query(
+  "SELECT * FROM vehiculos WHERE imei = ?",
+  [imei],
         (err, results) => {
           if (err) {
             console.log("Error buscando usuario:", err);
@@ -247,7 +247,7 @@ modelo_gps,
           if (results.length > 0) {
             return res.json({
               ok: false,
-              error: "Usuario ya existe",
+              error: "El IMEI ya existe",
             });
           }
 
@@ -562,8 +562,8 @@ app.delete("/vehiculos/:id", (req, res) => {
 // ===============================
 // CAMBIAR MOTOR
 // ===============================
-app.put("/vehiculos/:usuario/motor", (req, res) => {
-  const usuario = req.params.usuario;
+app.put("/vehiculos/:imei/motor", (req, res) => {
+  const imei = req.params.imei;
   const nuevoMotor = req.body.motor;
 
   let estado = "activo";
@@ -578,9 +578,9 @@ app.put("/vehiculos/:usuario/motor", (req, res) => {
     `
     UPDATE vehiculos
     SET motor = ?, estado = ?, velocidad = ?
-    WHERE usuario = ?
+    WHERE imei = ?
     `,
-    [nuevoMotor, estado, velocidad, usuario],
+    [nuevoMotor, estado, velocidad, imei],
     (err) => {
       if (err) {
         console.log("Error cambiando motor:", err);
@@ -588,40 +588,45 @@ app.put("/vehiculos/:usuario/motor", (req, res) => {
       }
 
       guardarEvento(
-  usuario,
+  imei,
   "motor",
   nuevoMotor === "encendido"
     ? "Motor encendido"
     : "Motor apagado"
 );
 
-io.emit("motor-actualizado", { usuario, motor: nuevoMotor, estado });
+io.emit("motor-actualizado", { imei, motor: nuevoMotor, estado });
 res.json({ ok: true });
     }
   );
 });
 
 // ===============================
-// BLOQUEAR / DESBLOQUEAR
+// BLOQUEAR / DESBLOQUEAR POR IMEI
 // ===============================
-app.put("/vehiculos/:usuario/bloqueo", (req, res) => {
-  const usuario = req.params.usuario;
+app.put("/vehiculos/:imei/bloqueo", (req, res) => {
+  const imei = req.params.imei;
   const { bloqueo } = req.body;
 
   let estado = "apagado";
   let motor = "apagado";
   let velocidad = 0;
 
-  if (bloqueo === "bloqueado") estado = "bloqueado";
-  if (bloqueo === "desbloqueado") estado = "apagado";
+  if (bloqueo === "bloqueado") {
+    estado = "bloqueado";
+  }
+
+  if (bloqueo === "desbloqueado") {
+    estado = "apagado";
+  }
 
   db.query(
     `
     UPDATE vehiculos
     SET bloqueo = ?, estado = ?, motor = ?, velocidad = ?
-    WHERE usuario = ?
+    WHERE imei = ?
     `,
-    [bloqueo, estado, motor, velocidad, usuario],
+    [bloqueo, estado, motor, velocidad, imei],
     (err) => {
       if (err) {
         console.log("Error bloqueando/desbloqueando:", err);
@@ -629,19 +634,24 @@ app.put("/vehiculos/:usuario/bloqueo", (req, res) => {
       }
 
       guardarEvento(
-  usuario,
-  "bloqueo",
-  bloqueo === "bloqueado"
-    ? "Vehículo bloqueado"
-    : "Vehículo desbloqueado"
-);
+        imei,
+        "bloqueo",
+        bloqueo === "bloqueado"
+          ? "Vehículo bloqueado"
+          : "Vehículo desbloqueado"
+      );
 
-      io.emit("bloqueo-actualizado", { usuario, bloqueo, estado, motor });
+      io.emit("bloqueo-actualizado", {
+        imei,
+        bloqueo,
+        estado,
+        motor
+      });
+
       res.json({ ok: true });
     }
   );
 });
-
 // ===============================
 // RUTA GPS SIMULADA
 // ===============================

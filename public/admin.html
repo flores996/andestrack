@@ -1015,7 +1015,7 @@ v.conectado_traccar
 
                 <button
 class="btn-on"
-onclick="encenderMotor('${v.usuario}')"
+onclick="encenderMotor('${v.imei}')"
 ${v.estado === 'bloqueado' ? 'disabled' : ''}>
 🟢 ON
 </button>
@@ -1023,33 +1023,33 @@ ${v.estado === 'bloqueado' ? 'disabled' : ''}>
 
                 <button
                 class="btn-off"
-                onclick="apagarMotor('${v.usuario}')">
+                onclick="apagarMotor('${v.imei}')">
                 🔴 OFF
                 </button>
 
                 <button
                 class="btn-bloq"
-                onclick="bloquearVehiculo('${v.usuario}')">
+                onclick="bloquearVehiculo('${v.imei}')">
                 🔒 Bloq
                 </button>
 
                 <button
                 class="btn-free"
-                onclick="desbloquearVehiculo('${v.usuario}')">
+                onclick="desbloquearVehiculo('${v.imei}')">
                 🔓 Free
                 </button>
 
                 <button
                 class="btn-gps"
-                onclick="verGPS(${v.latitud}, ${v.longitud}, '${v.usuario}')">
+                onclick="verGPS(${v.latitud}, ${v.longitud}, '${v.imei}')">
                 📍 GPS
                 </button>
 
                 <button
-                class="btn-eliminar"
-onclick="eliminarClientePorImei('${v.imei}')"
-                🗑️ Eliminar
-                </button>
+class="btn-eliminar"
+onclick="eliminarClientePorImei('${v.imei}')">
+🗑️ Eliminar
+</button>
                 <button
 onclick="editarCliente('${v.imei}')"
 style="background:#0ea5e9;">
@@ -1257,153 +1257,47 @@ async function eliminarClientePorImei(imei){
 // APAGAR
 // ======================================
 
-async function apagarMotor(id){
-
-    await fetch('/vehiculos/' + id + '/motor', {
-
+async function apagarMotor(imei){
+    await fetch('/vehiculos/' + imei + '/motor', {
         method:'PUT',
-
-        headers:{
-            'Content-Type':'application/json'
-        },
-
-        body:JSON.stringify({
-
-            motor:'apagado'
-
-        })
-
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ motor:'apagado' })
     });
 
     cargarClientes();
-
 }
 
-// ======================================
-// ENCENDER
-// ======================================
-
-async function encenderMotor(id){
-
-    await fetch('/vehiculos/' + id + '/motor', {
-
+async function encenderMotor(imei){
+    await fetch('/vehiculos/' + imei + '/motor', {
         method:'PUT',
-
-        headers:{
-            'Content-Type':'application/json'
-        },
-
-        body: JSON.stringify({
-
-            motor:'encendido'
-
-        })
-
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ motor:'encendido' })
     });
 
     cargarClientes();
-
 }
 
-// ======================================
-// BLOQUEAR
-// ======================================
-
-async function bloquearVehiculo(usuario){
-
-    console.log(usuario);
-
-    await fetch('/vehiculos/' + usuario + '/bloqueo', {
-
+async function bloquearVehiculo(imei){
+    await fetch('/vehiculos/' + imei + '/bloqueo', {
         method:'PUT',
-
-        headers:{
-            'Content-Type':'application/json'
-        },
-
-        body: JSON.stringify({
-
-            bloqueo:'bloqueado'
-
-        })
-
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ bloqueo:'bloqueado' })
     });
 
     alert('Vehículo bloqueado');
-
     cargarClientes();
-
 }
 
-// ======================================
-// DESBLOQUEAR
-// ======================================
-
-async function desbloquearVehiculo(usuario){
-
-    await fetch('/vehiculos/' + usuario + '/bloqueo', {
-
+async function desbloquearVehiculo(imei){
+    await fetch('/vehiculos/' + imei + '/bloqueo', {
         method:'PUT',
-
-        headers:{
-            'Content-Type':'application/json'
-        },
-
-        body: JSON.stringify({
-
-            bloqueo:'desbloqueado'
-
-        })
-
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ bloqueo:'desbloqueado' })
     });
 
     alert('Vehículo desbloqueado');
-
     cargarClientes();
-
 }
-// ======================================
-// ENCENDER
-// ======================================
-async function encenderMotor(id){
-
-    await fetch('/vehiculos/' + id + '/motor', {
-
-        method:'PUT',
-
-        headers:{
-            'Content-Type':'application/json'
-        },
-
-        body: JSON.stringify({
-            motor:'encendido'
-        })
-
-    });
-
-}
-async function bloquearVehiculo(usuario){
-
-    console.log(usuario);
-
-    await fetch('/vehiculos/' + usuario + '/bloqueo', {
-
-        method:'PUT',
-
-        headers:{
-            'Content-Type':'application/json'
-        },
-
-        body: JSON.stringify({
-            bloqueo:'bloqueado'
-        })
-
-    });
-
-    alert('Vehículo bloqueado');
-
-}
-
 // ======================================
 // GPS
 // ======================================

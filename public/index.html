@@ -818,6 +818,8 @@ async function validarClienteActivo(){
     }
 
     const usuarioActual = localStorage.getItem("usuario");
+    const gpsActual = localStorage.getItem("gps");
+
 
     const respuesta = await fetch("/validar-cliente", {
         method:"POST",
@@ -890,12 +892,13 @@ async function cargarVehiculosIniciales(){
 
         console.log("VEHÍCULOS TRACCAR INDEX:", lista);
 
-        const listaFiltrada = esAdmin
-            ? lista
-            : lista.filter(v =>
-                String(v.usuario).trim().toLowerCase() ===
-                String(usuarioActual).trim().toLowerCase()
-            );
+        const gpsActual = localStorage.getItem("gps");
+
+const listaFiltrada = esAdmin
+    ? lista
+    : lista.filter(v =>
+        String(v.gps).trim() === String(gpsActual).trim()
+    );
 
         listaFiltrada.forEach(data => {
             procesarVehiculo(data);
@@ -944,11 +947,11 @@ function procesarVehiculo(data){
 
    if(!esAdmin){
 
-    const usuarioActual = localStorage.getItem("usuario");
+    const gpsActual = localStorage.getItem("gps");
 
     if(
-        String(data.usuario).trim().toLowerCase() !==
-        String(usuarioActual).trim().toLowerCase()
+        String(data.gps).trim() !==
+        String(gpsActual).trim()
     ){
         return;
     }
@@ -956,7 +959,7 @@ function procesarVehiculo(data){
 
     console.log("RECIBIDO:", data);
 
-    const id = data.usuario;
+    const id = data.imei;
 
     if (!vehiculos[id]) {
 
